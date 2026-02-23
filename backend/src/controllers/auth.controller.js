@@ -1,7 +1,7 @@
 const userModel = require("../models/user.model")
 const foodPartnerModel = require("../models/foodPartner.model")
 const jwt = require("jsonwebtoken")
-const { default: bcrypt } = require("bcryptjs")
+const bcrypt = require("bcryptjs")
 
 async function registerUser(req, res) {
     const { fullName, email, password } = req.body
@@ -92,7 +92,7 @@ function logoutUser(req, res) {
 async function registerFoodPartner(req, res) {
     const { name, email, password } = req.body
 
-    const isFoodPartnerAlreadyExists = foodPartnerModel.findOne({
+    const isFoodPartnerAlreadyExists = await foodPartnerModel.findOne({
         email
     });
 
@@ -102,9 +102,9 @@ async function registerFoodPartner(req, res) {
         })
     }
 
-    const hashedPassword = bcrypt.hash(password, 10)
+    const hashedPassword = await bcrypt.hash(password, 10)
 
-    const foodPartner = foodPartnerModel.create({
+    const foodPartner = await foodPartnerModel.create({
         name,
         email,
         password: hashedPassword
@@ -135,7 +135,7 @@ async function loginFoodPartner(req, res) {
     })
 
     if (!foodPartner) {
-        return es.status(400).json({
+        return res.status(400).json({
             message: "invalid email or password"
         })
     }
