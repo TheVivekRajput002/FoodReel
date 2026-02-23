@@ -5,7 +5,7 @@ const { v4: uuid } = require("uuid")
 async function createFood(req, res) {
 
     const uploadFileResult = await uploadFile(req.file.buffer, uuid())
-    console.log(fileUploadResult)
+    console.log(uploadFileResult)
     res.send("food item created")
 
     console.log(req.foodPartner)
