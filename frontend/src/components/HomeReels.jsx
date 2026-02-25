@@ -1,38 +1,33 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
+import axios from "axios"
 
 function HomeReels() {
     // Mock data - replace with actual video data from backend
-    const [reels] = useState([
-        {
-            id: 1,
-            video: 'https://via.placeholder.com/400x800?text=Video+1',
-            description: 'Delicious margherita pizza from our premium kitchen',
-            storeName: 'Pizza Palace'
-        },
-        {
-            id: 2,
-            video: 'https://via.placeholder.com/400x800?text=Video+2',
-            description: 'Fresh sushi rolls made to order with premium ingredients',
-            storeName: 'Sushi House'
-        },
-        {
-            id: 3,
-            video: 'https://via.placeholder.com/400x800?text=Video+3',
-            description: 'Authentic biryanis cooked in traditional methods',
-            storeName: 'Biryani Corner'
-        }
-    ])
+    const [videos, setVideos] = useState([])
+
+    useEffect(() => {
+        axios.get("http://localhost:3000/api/food/", { withCredentials: true })
+            .then(response => {
+                setVideos(response.data.foodItems)
+                // console.log(response.data.foodItems)
+            })
+    }, [])
+
 
     return (
-        <div className="h-[90vh] snap-y snap-mandatory overflow-y-scroll bg-black">
-            {reels.map(reel => (
-                <div key={reel.id} className="h-full w-full snap-center snap-always relative flex items-center justify-center bg-gray-900">
+        <div className="h-[90vh] snap-y snap-mandatory overflow-y-scroll bg-black ">
+            {videos.map(reel => (
+                <div key={reel._id} className="h-full w-full snap-center snap-always relative flex items-center justify-center bg-gray-900">
                     {/* Video Background */}
                     <div className="absolute inset-0">
-                        <img 
-                            src={reel.video} 
-                            alt={reel.storeName}
-                            className="w-full h-full object-cover"
+                        <video
+                            src={reel.video}
+                            alt={reel.name}
+                            className="w-full h-full object-cover md:object-contain object-center"
+                            autoPlay
+                            loop
+                            muted
                         />
                         {/* Dark overlay */}
                         <div className="absolute inset-0 bg-black/20"></div>
@@ -46,9 +41,12 @@ function HomeReels() {
                         </p>
 
                         {/* Visit Store Button */}
-                        <button className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2.5 px-4 rounded-lg transition-colors">
-                            Visit Store
-                        </button>
+                        <Link to={`/food-partner/${reel.foodPartner}`}
+                        >
+                            <button className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2.5 px-4 rounded-lg transition-colors">
+                                Visit Store
+                            </button>
+                        </Link>
                     </div>
                 </div>
             ))}
