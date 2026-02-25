@@ -1,7 +1,37 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import axios from "axios"
 
 function FoodPartnerRegister() {
+
+    const navigate = useNavigate();
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        const name = e.target.name.value
+        const email = e.target.email.value
+        const password = e.target.password.value
+
+        try {
+            
+            const response = await axios.post("http://localhost:3000/api/auth/food-partner/register",{
+                name,
+                email,
+                password
+            }, {
+                withCredentials: true
+            } )
+
+            navigate("/create-food")
+
+        } catch (error) {
+            console.log("error in handle submit", error)
+        }
+
+
+    }
+
     return (
         <div
             className="min-h-dvh flex items-center justify-center p-6"
@@ -29,24 +59,24 @@ function FoodPartnerRegister() {
                     </p>
 
                     {/* Form */}
-                    <form className="flex flex-col gap-5" noValidate>
+                    <form className="flex flex-col gap-5" noValidate onSubmit={handleSubmit}>
 
                         {/* Restaurant name */}
                         <div>
                             <label htmlFor="restaurant-name" className="auth-label">Restaurant name</label>
-                            <input id="restaurant-name" type="text" placeholder="e.g. The Spice Kitchen" className="auth-input" autoComplete="organization" />
+                            <input id="restaurant-name" name='name' type="text" placeholder="e.g. The Spice Kitchen" className="auth-input" autoComplete="organization" />
                         </div>
 
                         {/* Business email */}
                         <div>
                             <label htmlFor="business-email" className="auth-label">Business email</label>
-                            <input id="business-email" type="email" placeholder="orders@yourrestaurant.com" className="auth-input" autoComplete="email" />
+                            <input id="business-email" name='email' type="email" placeholder="orders@yourrestaurant.com" className="auth-input" autoComplete="email" />
                         </div>
 
                         {/* Password */}
                         <div>
                             <label htmlFor="password" className="auth-label">Password</label>
-                            <input id="password" type="password" placeholder="Create a strong password" className="auth-input" autoComplete="new-password" />
+                            <input id="password" name="password" type="password" placeholder="Create a strong password" className="auth-input" autoComplete="new-password" />
                         </div>
 
                         {/* Terms */}

@@ -4,45 +4,58 @@ const jwt = require("jsonwebtoken")
 const bcrypt = require("bcryptjs")
 
 async function registerUser(req, res) {
-    const { fullName, email, password } = req.body
+    try {
+        const { fullName, email, password } = req.body
 
-    const isUserAlreadyExists = await userModel.findOne({
-        email
-    })
+        if (!fullName || !email || !password) {
+            return res.status(400).json({
+                message: "All fields are required"
+            })
+        }
 
-    if (isUserAlreadyExists) {
-        return res.status(400).json({
-            message: "user already exists"
+        const isUserAlreadyExists = await userModel.findOne({
+            email
+        })
+
+        if (isUserAlreadyExists) {
+            return res.status(400).json({
+                message: "user already exists"
+            })
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const user = await userModel.create({
+            fullName,
+            email,
+            password: hashedPassword
+        })
+
+        const token = jwt.sign({
+            id: user._id
+        }, process.env.JWT_SECRET)
+
+        res.cookie("token", token)
+
+        res.status(201).json({
+            message: "user registered successfully",
+            user: {
+                _id: user._id,
+                email: user.email,
+                fullName: user.fullName
+            }
+        })
+    } catch (err) {
+        console.error("Registration error:", err);
+        res.status(500).json({
+            message: "Registration failed",
+            error: err.message
         })
     }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const user = await userModel.create({
-        fullName,
-        email,
-        password: hashedPassword
-    })
-
-    const token = jwt.sign({
-        id: user._id
-    }, process.env.JWT_SECRET)
-
-    res.cookie("token", token)
-
-    res.status(201).json({
-        message: "user registered successfully",
-        user: {
-            _id: user._id,
-            email: user.email,
-            fullName: user.fullName
-        }
-    })
-
-
 }
 
 async function loginUser(req, res) {
+    try {
     const { email, password } = req.body;
 
     const user = await userModel.findOne({ email })
@@ -74,12 +87,13 @@ async function loginUser(req, res) {
             email: user.email,
         }
     })
-
-
-
-
-
-
+    } catch (err) {
+        console.error("Login error:", err);
+        res.status(500).json({
+            message: "Login failed",
+            error: err.message
+        })
+    }
 }
 
 function logoutUser(req, res) {

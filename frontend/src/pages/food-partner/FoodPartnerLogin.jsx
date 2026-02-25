@@ -1,7 +1,36 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import axios from "axios"
+
 
 function FoodPartnerLogin() {
+
+    const navigate = useNavigate();
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        const email = e.target.email.value;
+        const password = e.target.password.value;
+
+        try {
+
+            const response = await axios.post("http://localhost:3000/api/auth/food-partner/login", {
+                email,
+                password
+            }, {
+                withCredentials: true
+            })
+
+            console.log(response.data)
+            navigate("/create-food")
+
+        } catch (error) {
+            console.log("err in foodpartnerlogin handlesubmit", error)
+        }
+
+    }
+
     return (
         <div
             className="min-h-dvh flex items-center justify-center p-6"
@@ -29,12 +58,12 @@ function FoodPartnerLogin() {
                     </p>
 
                     {/* Form */}
-                    <form className="flex flex-col gap-5" noValidate>
+                    <form className="flex flex-col gap-5" noValidate onSubmit={handleSubmit}>
 
                         {/* Business email */}
                         <div>
                             <label htmlFor="business-email" className="auth-label">Business email</label>
-                            <input id="business-email" type="email" placeholder="orders@yourrestaurant.com" className="auth-input" autoComplete="email" />
+                            <input id="business-email" type="email" name="email" placeholder="orders@yourrestaurant.com" className="auth-input" autoComplete="email" />
                         </div>
 
                         {/* Password */}
@@ -42,10 +71,10 @@ function FoodPartnerLogin() {
                             <div className="flex items-center justify-between mb-1.5">
                                 <label htmlFor="password" className="auth-label" style={{ marginBottom: 0 }}>Password</label>
                             </div>
-                            <input id="password" type="password" placeholder="Enter your password" className="auth-input" autoComplete="current-password" />
+                            <input id="password" name='password' type="password" placeholder="Enter your password" className="auth-input" autoComplete="current-password" />
                         </div>
 
-                
+
 
                         <button type="submit" className="auth-btn-primary">Sign in to dashboard</button>
                     </form>

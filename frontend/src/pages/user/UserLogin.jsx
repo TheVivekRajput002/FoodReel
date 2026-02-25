@@ -1,7 +1,34 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import axios from "axios"
 
 function UserLogin() {
+
+    const navigate = useNavigate()
+
+    const handleSubmit = async (e) => {
+        e.preventDefault()
+
+        const email = e.target.email.value
+        const password = e.target.password.value
+
+        try {
+
+            const response = await axios.post("http://localhost:3000/api/auth/user/login", {
+                email,
+                password
+            }, {
+                withCredentials: true
+            })
+
+            console.log(response.data)
+            navigate("/")
+
+        } catch (error) {
+            console.log("error in UserLogin in sending data", error)
+        }
+    }
+
     return (
         <div
             className="min-h-dvh flex items-center justify-center p-6"
@@ -29,7 +56,7 @@ function UserLogin() {
                     </p>
 
                     {/* Form */}
-                    <form className="flex flex-col gap-5" noValidate>
+                    <form className="flex flex-col gap-5" noValidate onSubmit={handleSubmit}>
 
                         {/* Email */}
                         <div>
@@ -41,7 +68,7 @@ function UserLogin() {
                         <div>
                             <div className="flex items-center justify-between mb-1.5">
                                 <label htmlFor="password" className="auth-label" style={{ marginBottom: 0 }}>Password</label>
-                               
+
                             </div>
                             <input id="password" type="password" placeholder="Enter your password" className="auth-input" autoComplete="current-password" />
                         </div>

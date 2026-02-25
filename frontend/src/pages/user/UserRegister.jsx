@@ -1,7 +1,37 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import axios from 'axios'
 
 function UserRegister() {
+
+    const navigate = useNavigate();
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        const fullName = `${e.target.firstName.value} ${e.target.lastName.value}`
+        const email = e.target.email.value
+        const password = e.target.password.value
+
+        try {
+            const response = await axios.post("http://localhost:3000/api/auth/user/register", {
+                fullName,
+                email,
+                password
+            },{
+                withCredentials: true
+            })
+
+            console.log(response.data);
+            navigate("/")
+
+        } catch (error) {
+            console.error("Registration error:", error.response?.data || error.message)
+        }
+
+
+    }
+
     return (
         <div
             className="min-h-dvh flex items-center justify-center p-6"
@@ -29,30 +59,30 @@ function UserRegister() {
                     </p>
 
                     {/* Form */}
-                    <form className="flex flex-col gap-5" noValidate>
+                    <form className="flex flex-col gap-5" noValidate onSubmit={handleSubmit}>
 
                         {/* Name row */}
                         <div className="grid grid-cols-2 gap-3">
                             <div>
                                 <label htmlFor="first-name" className="auth-label">First name</label>
-                                <input id="first-name" type="text" placeholder="John" className="auth-input" autoComplete="given-name" />
+                                <input id="first-name" name='firstName' type="text" placeholder="John" className="auth-input" autoComplete="given-name" />
                             </div>
                             <div>
                                 <label htmlFor="last-name" className="auth-label">Last name</label>
-                                <input id="last-name" type="text" placeholder="Doe" className="auth-input" autoComplete="family-name" />
+                                <input id="last-name" name='lastName' type="text" placeholder="Doe" className="auth-input" autoComplete="family-name" />
                             </div>
                         </div>
 
                         {/* Email */}
                         <div>
                             <label htmlFor="email" className="auth-label">Email address</label>
-                            <input id="email" type="email" placeholder="you@example.com" className="auth-input" autoComplete="email" />
+                            <input id="email" type="email" name='email' placeholder="you@example.com" className="auth-input" autoComplete="email" />
                         </div>
 
                         {/* Password */}
                         <div>
                             <label htmlFor="password" className="auth-label">Password</label>
-                            <input id="password" type="password" placeholder="Create a strong password" className="auth-input" autoComplete="new-password" />
+                            <input id="password" name='password' type="password" placeholder="Create a strong password" className="auth-input" autoComplete="new-password" />
                         </div>
 
                         {/* Terms */}
