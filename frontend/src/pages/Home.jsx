@@ -1,5 +1,6 @@
 import React from 'react'
 import { Link, Outlet } from 'react-router-dom'
+import HomeReels from '../components/HomeReels'
 import './Home.css'
 
 function Home() {
@@ -32,24 +33,8 @@ function Home() {
             <main className="home-main">
                 <Outlet />
 
-                {/* Hero shown only on "/" itself */}
-                <div className="home-hero">
-                    <h1 className="home-hero__title">
-                        Great food,<br />
-                        <span className="home-hero__accent">delivered fast.</span>
-                    </h1>
-                    <p className="home-hero__sub">
-                        Discover hundreds of restaurants near you. Order in minutes.
-                    </p>
-                    <div className="home-hero__actions">
-                        <Link to="/user/register" className="home-hero__btn home-hero__btn--primary">
-                            Create an account
-                        </Link>
-                        <Link to="/user/login" className="home-hero__btn home-hero__btn--ghost">
-                            Sign in
-                        </Link>
-                    </div>
-                </div>
+                {/* Reels Feed */}
+                <HomeReels />
             </main>
         </div>
     )
