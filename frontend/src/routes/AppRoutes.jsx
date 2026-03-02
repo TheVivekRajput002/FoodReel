@@ -20,7 +20,7 @@ function AppRoutes() {
         <Route path='/user/login' element={<UserLogin />} />
         <Route path='/food-partner/register' element={<FoodPartnerRegister />} />
         <Route path='/food-partner/login' element={<FoodPartnerLogin />} />
-        <Route path='/food-partner/:profile' element={<FoodPartnerProfile />} />
+        <Route path='/food-partner/:id' element={<FoodPartnerProfile />} />
         <Route path='/create-food' element={<CreateFood />} />
       </Routes>
     </Router>
