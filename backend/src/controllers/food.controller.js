@@ -67,7 +67,7 @@ async function likeFood(req, res) {
     }
 }
 
-async function saveFood(req, res) {
+async function bookmarkFood(req, res) {
     const { foodId } = req.body
     const user = req.user
 
@@ -76,10 +76,13 @@ async function saveFood(req, res) {
         food: foodId
     })
 
-    if (!isAlreadySaved) {
+    if (isAlreadySaved) {
         await saveModel.deleteOne({
             user: user._id,
             food: foodId
+        })
+        await saveModel.findByIdAndUpdate(foodId, {
+            $inc: { bookmarkCount: -1 }
         })
         return res.status(201).json({ message: "food unsaved successfully" })
     }
@@ -87,6 +90,10 @@ async function saveFood(req, res) {
     const save = await saveModel.create({
         user: user._id,
         food: foodId
+    })
+
+    await saveModel.findByIdAndUpdate(foodId, {
+        $inc: { bookmarkCount: 1 }
     })
 
     res.status(201).json({
@@ -100,5 +107,5 @@ module.exports = {
     createFood,
     getFoodItems,
     likeFood,
-    saveFood
+    bookmarkFood
 }

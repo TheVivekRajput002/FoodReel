@@ -32,7 +32,20 @@ function HomeReels() {
             console.log("video DISliked")
             setVideos((prev) => prev.map((v) => v._id === reel._id ? { ...v, likeCount: v.likeCount - 1 } : v))
         }
+        
+    }
+    
+    async function bookmarkVideo(reel){
+        const response = await axios.post("http://localhost:3000/api/food/bookmark", {foodId: reel._id}, {withCredentials: true}  )
+        
+        if(response.data.save){
+            console.log("reel bookmarked")
+            setVideos((prev) => prev.map((v) => v._id === reel._id ? { ...v, bookmarkCount: v.bookmarkCount + 1 } : v))
+        } else {
+            console.log("reel unbookmarked")
+            setVideos((prev) => prev.map((v) => v._id === reel._id ? { ...v, bookmarkCount: v.bookmarkCount - 1 } : v))
 
+        }
     }
 
     return (
@@ -74,7 +87,7 @@ function HomeReels() {
 
                         {/* Save */}
                         <button
-                            onClick={() => toggleSave(reel._id)}
+                            onClick={() => {toggleSave(reel._id); bookmarkVideo(reel); }}
                             className="flex flex-col items-center gap-1 group"
                         >
                             <div className="w-11 h-11 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center group-hover:bg-white/20 transition-all group-active:scale-90">
@@ -82,7 +95,7 @@ function HomeReels() {
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
                                 </svg>
                             </div>
-                            <span className="text-white/80 text-[11px] font-medium">Save : {reel.saves || 0}</span>
+                            <span className="text-white/80 text-[11px] font-medium">Save : {reel.bookmarkCount || 0}</span>
                         </button>
 
                         {/* Comment */}
