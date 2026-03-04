@@ -3,6 +3,8 @@ import React, { Profiler } from 'react'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 
 import Home from '../pages/Home'
+import Saved from '../pages/Saved'
+import UserProfile from '../pages/UserProfile'
 import UserRegister from '../pages/user/UserRegister'
 import UserLogin from '../pages/user/UserLogin'
 import FoodPartnerRegister from '../pages/food-partner/FoodPartnerRegister'
@@ -16,6 +18,8 @@ function AppRoutes() {
     <Router>
       <Routes>
         <Route path='/' element={<Home />} />
+        <Route path='/saved' element={<Saved />} />
+        <Route path='/profile' element={<UserProfile />} />
         <Route path='/user/register' element={<UserRegister />} />
         <Route path='/user/login' element={<UserLogin />} />
         <Route path='/food-partner/register' element={<FoodPartnerRegister />} />

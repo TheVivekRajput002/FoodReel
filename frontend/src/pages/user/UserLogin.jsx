@@ -22,7 +22,7 @@ function UserLogin() {
             })
 
             console.log(response.data)
-            navigate("/")
+            navigate("/profile")
 
         } catch (error) {
             console.log("error in UserLogin in sending data", error)

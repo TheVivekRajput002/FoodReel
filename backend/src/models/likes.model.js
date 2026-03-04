@@ -11,7 +11,6 @@ const likeSchema = new mongoose.Schema({
         ref: "food",
         required: true
     }
-
 }, {
     timestamps: true
 })
