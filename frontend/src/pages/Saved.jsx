@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
-import BottomNav from '../components/BottomNav'
 
 function Saved() {
     // Mock saved items — replace with actual saved data from backend/local storage
@@ -119,8 +118,6 @@ function Saved() {
                 )}
             </div>
 
-            {/* ── Bottom Navbar ─────────────────────────────────── */}
-            <BottomNav />
         </div>
     )
 }

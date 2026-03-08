@@ -1,6 +1,5 @@
 import React from 'react'
 import HomeReels from '../components/HomeReels'
-import BottomNav from '../components/BottomNav'
 
 function Home() {
     return (
@@ -11,8 +10,6 @@ function Home() {
                 <HomeReels />
             </main>
 
-            {/* ── Bottom Navbar ─────────────────────────────────── */}
-            <BottomNav />
         </div>
     )
 }

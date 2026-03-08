@@ -1,0 +1,72 @@
+{
+    "conversations": [
+        {
+            "id": "conv_001",
+            "partner": {
+                "id": "fp_001",
+                "name": "Spice Route Kitchen",
+                "avatar": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=150&h=150&fit=crop",
+                "isOnline": true
+            },
+            "lastMessage": "Your table is confirmed for 8 PM!",
+            "time": "10:42 AM",
+            "unreadCount": 1
+        },
+        {
+            "id": "conv_002",
+            "partner": {
+                "id": "usr_002",
+                "name": "Arjun Patel",
+                "avatar": "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=150&h=150&fit=crop",
+                "isOnline": false
+            },
+            "lastMessage": "Bro, check out this pizza place I found.",
+            "time": "Yesterday",
+            "unreadCount": 0
+        },
+        {
+            "id": "conv_003",
+            "partner": {
+                "id": "fp_002",
+                "name": "Tokyo Bites",
+                "avatar": "https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=150&h=150&fit=crop",
+                "isOnline": true
+            },
+            "lastMessage": "We just added a new sushi platter to the menu.",
+            "time": "Monday",
+            "unreadCount": 0
+        }
+    ],
+    "threads": {
+        "conv_001": [
+            {
+                "id": "msg_001",
+                "text": "Hi, do you take reservations for tonight?",
+                "isOwn": true,
+                "timestamp": "10:30 AM",
+                "seen": true
+            },
+            {
+                "id": "msg_002",
+                "text": "Yes we do! What time and for how many people?",
+                "isOwn": false,
+                "timestamp": "10:32 AM",
+                "seen": true
+            },
+            {
+                "id": "msg_003",
+                "text": "8 PM, party of 2 please.",
+                "isOwn": true,
+                "timestamp": "10:35 AM",
+                "seen": true
+            },
+            {
+                "id": "msg_004",
+                "text": "Your table is confirmed for 8 PM!",
+                "isOwn": false,
+                "timestamp": "10:42 AM",
+                "seen": false
+            }
+        ]
+    }
+}

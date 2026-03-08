@@ -71,7 +71,7 @@ function HomeReels() {
                     </div>
 
                     {/* ── Right Side Actions (Like, Save, Comment) ── */}
-                    <div className="absolute right-6 bottom-36 flex flex-col items-center gap-5 z-10">
+                    <div className="absolute right-6 bottom-48 flex flex-col items-center gap-5 z-10">
                         {/* Like */}
                         <button
                             onClick={() => { toggleLike(reel._id); likeVideo(reel); }}
@@ -110,7 +110,7 @@ function HomeReels() {
                     </div>
 
                     {/* ── Bottom Content (Description + Visit Store) ── */}
-                    <div className="absolute bottom-4 left-4 right-20 z-10">
+                    <div className="absolute bottom-16 left-4 right-20 z-10">
                         {/* Description */}
                         <p className="text-white/90 text-sm font-medium mb-3 line-clamp-2 drop-shadow-lg">
                             {reel.description || 'description'}

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
-import BottomNav from '../components/BottomNav'
 
 function UserProfile() {
     const [user, setUser] = useState(null)
@@ -25,8 +24,8 @@ function UserProfile() {
         try {
             await axios.get("http://localhost:3000/api/auth/user/logout", { withCredentials: true })
             navigate("/user/login")
-        } catch (err) {
-            console.error("Logout failed", err)
+        } catch (errorLogMsg) {
+            console.error("Logout failed", errorLogMsg)
         }
     }
 
@@ -36,7 +35,6 @@ function UserProfile() {
                 <div className="flex-1 flex items-center justify-center">
                     <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
                 </div>
-                <BottomNav />
             </div>
         )
     }
@@ -58,16 +56,11 @@ function UserProfile() {
                         Sign In
                     </button>
                 </div>
-                <BottomNav />
             </div>
         )
     }
 
-    const memberSince = new Date(user.createdAt).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    })
+    // Inlined memberSince into the JSX below
 
     return (
         <div className="h-[100dvh] w-full bg-black flex flex-col">
@@ -86,52 +79,40 @@ function UserProfile() {
                     </div>
                 </div>
 
-                {/* ── Info Cards ─────────────────────────────── */}
-                <div className="space-y-3">
-                    {/* Full Name */}
-                    <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center shrink-0">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                            </svg>
-                        </div>
-                        <div>
-                            <p className="text-white/40 text-[11px] font-medium uppercase tracking-wider">Full Name</p>
-                            <p className="text-white text-sm font-medium mt-0.5">{user.fullName}</p>
-                        </div>
-                    </div>
+                {/* ── Profile Tabs ─────────────────────────────── */}
+                <div className="flex border-b border-[var(--color-border)] mb-4 sticky top-0 bg-[var(--color-bg)] z-10">
+                    {['Posts', 'Reels', 'Tagged', 'Saved'].map((tab, idx) => (
+                        <button 
+                            key={tab}
+                            className={`flex-1 py-3 text-sm font-semibold text-center border-b-2 transition-colors ${
+                                idx === 0 
+                                ? 'border-[var(--color-primary)] text-[var(--color-text-primary)]' 
+                                : 'border-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]'
+                            }`}
+                        >
+                            {tab}
+                        </button>
+                    ))}
+                </div>
 
-                    {/* Email */}
-                    <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center shrink-0">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-                            </svg>
+                {/* ── Posts Grid (Stub) ───────────────────────── */}
+                <div className="grid grid-cols-3 gap-1 mb-8">
+                    {[1, 2, 3, 4, 5, 6].map(item => (
+                        <div key={item} className="aspect-square bg-[var(--color-surface-2)] relative group cursor-pointer">
+                            {/* Placeholder for real images */}
+                            <div className="absolute inset-0 flex items-center justify-center text-[var(--color-text-muted)] opacity-50">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </div>
                         </div>
-                        <div>
-                            <p className="text-white/40 text-[11px] font-medium uppercase tracking-wider">Email</p>
-                            <p className="text-white text-sm font-medium mt-0.5">{user.email}</p>
-                        </div>
-                    </div>
-
-                    {/* Member Since */}
-                    <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center shrink-0">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-                            </svg>
-                        </div>
-                        <div>
-                            <p className="text-white/40 text-[11px] font-medium uppercase tracking-wider">Member Since</p>
-                            <p className="text-white text-sm font-medium mt-0.5">{memberSince}</p>
-                        </div>
-                    </div>
+                    ))}
                 </div>
 
                 {/* ── Logout Button ──────────────────────────── */}
                 <button
                     onClick={handleLogout}
-                    className="mt-8 w-full bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 font-semibold py-3 rounded-2xl transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                    className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-danger)] font-semibold py-3 rounded-xl transition-all active:scale-[0.98] flex items-center justify-center gap-2 hover:bg-red-500/5 mt-4"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
@@ -140,8 +121,6 @@ function UserProfile() {
                 </button>
             </div>
 
-            {/* ── Bottom Nav ─────────────────────────────────── */}
-            <BottomNav />
         </div>
     )
 }
