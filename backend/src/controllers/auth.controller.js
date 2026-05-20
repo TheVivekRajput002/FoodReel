@@ -5,21 +5,28 @@ const bcrypt = require("bcrypt")
 
 async function registerUser(req, res) {
     try {
-        const { fullName, email, password } = req.body
+        const { fullName, username, email, password } = req.body
 
-        if (!fullName || !email || !password) {
+        if (!fullName || !username || !email || !password) {
             return res.status(400).json({
                 message: "All fields are required"
             })
         }
 
-        const isUserAlreadyExists = await userModel.findOne({
-            email
-        })
+        const normalizedUsername = username.trim().toLowerCase();
+        const normalizedEmail = email.trim().toLowerCase();
 
-        if (isUserAlreadyExists) {
+        const isEmailTaken = await userModel.findOne({ email: normalizedEmail })
+        if (isEmailTaken) {
             return res.status(400).json({
-                message: "user already exists"
+                message: "email already in use"
+            })
+        }
+
+        const isUsernameTaken = await userModel.findOne({ username: normalizedUsername })
+        if (isUsernameTaken) {
+            return res.status(400).json({
+                message: "username already in use"
             })
         }
 
@@ -27,7 +34,8 @@ async function registerUser(req, res) {
 
         const user = await userModel.create({
             fullName,
-            email,
+            username: normalizedUsername,
+            email: normalizedEmail,
             password: hashedPassword
         })
 
@@ -47,7 +55,8 @@ async function registerUser(req, res) {
             user: {
                 _id: user._id,
                 email: user.email,
-                fullName: user.fullName
+                fullName: user.fullName,
+                username: user.username
             }
         })
     } catch (err) {
@@ -63,7 +72,7 @@ async function loginUser(req, res) {
     try {
         const { email, password } = req.body;
 
-        const user = await userModel.findOne({ email })
+        const user = await userModel.findOne({ email: email.trim().toLowerCase() })
 
         if (!user) {
             return res.status(400).json({
@@ -95,6 +104,7 @@ async function loginUser(req, res) {
             user: {
                 _id: user._id,
                 email: user.email,
+                username: user.username,
             }
         })
     } catch (err) {
@@ -212,6 +222,7 @@ function getUserProfile(req, res) {
         user: {
             _id: user._id,
             fullName: user.fullName,
+            username: user.username,
             email: user.email,
             createdAt: user.createdAt
         }
