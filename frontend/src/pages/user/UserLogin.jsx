@@ -14,7 +14,7 @@ function UserLogin() {
 
         try {
 
-            const response = await axios.post("http://localhost:3000/api/auth/user/login", {
+            const response = await axios.post(`${process.env.VITE_API_URL}/api/auth/user/login`, {
                 email,
                 password
             }, {

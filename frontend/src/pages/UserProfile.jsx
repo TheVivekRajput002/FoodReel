@@ -9,7 +9,7 @@ function UserProfile() {
     const navigate = useNavigate()
 
     useEffect(() => {
-        axios.get("http://localhost:3000/api/auth/user/profile", { withCredentials: true })
+        axios.get(`${process.env.VITE_API_URL}/api/auth/user/profile`, { withCredentials: true })
             .then(response => {
                 setUser(response.data.user)
                 setLoading(false)
@@ -22,7 +22,7 @@ function UserProfile() {
 
     const handleLogout = async () => {
         try {
-            await axios.get("http://localhost:3000/api/auth/user/logout", { withCredentials: true })
+            await axios.get(`${process.env.VITE_API_URL}/api/auth/user/logout`, { withCredentials: true })
             navigate("/user/login")
         } catch (errorLogMsg) {
             console.error("Logout failed", errorLogMsg)

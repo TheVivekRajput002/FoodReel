@@ -15,7 +15,7 @@ function FoodPartnerRegister() {
 
         try {
             
-            await axios.post("http://localhost:3000/api/auth/food-partner/register",{
+            await axios.post(`${process.env.VITE_API_URL}/api/auth/food-partner/register`,{
                 name,
                 email,
                 password
