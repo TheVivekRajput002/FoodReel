@@ -3,7 +3,7 @@ const cookieParser = require("cookie-parser")
 require('dotenv').config();
 const authRoutes = require("./routes/auth.route")
 const userRoutes = require("./routes/user.route")
-const foodRoutes = require("./routes/food.route")
+const reelRoutes = require("./routes/reel.route")
 const foodPartnerRoutes = require("./routes/food-partner.route")
 const cors = require("cors")
 const helmet = require("helmet");
@@ -34,8 +34,8 @@ app.use(cookieParser())
 app.use(express.urlencoded({ extended: true }));
 app.use(helmet());
 const authLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,  // 15 minute window
-    max: 20,                    // max 20 requests per IP in that window
+    windowMs: 5 * 60 * 1000,  // 5 minute window
+    max: 25,                    // max 20 requests per IP in that window
     message: { message: "Too many attempts, try again later" },
     standardHeaders: true,      // sends RateLimit headers in response
     legacyHeaders: false,
@@ -48,7 +48,7 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authLimiter)
 app.use("/api/auth", authRoutes)
 app.use("/api/user", userRoutes)
-app.use("/api/food", foodRoutes)
+app.use("/api/reel", reelRoutes)
 app.use("/api/food-partner", foodPartnerRoutes)
 
 module.exports = app;

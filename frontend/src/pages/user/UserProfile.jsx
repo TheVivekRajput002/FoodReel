@@ -71,9 +71,9 @@ function UserProfile() {
     return (
         <div className="min-h-[100dvh] w-full bg-[var(--color-bg)] text-[var(--color-text-primary)]">
             <div className="mx-auto w-full max-w-[980px] px-4 pb-24 pt-8 md:px-8 md:pb-10 md:pt-12">
-                <section className="flex flex-col gap-6 md:flex-row md:items-start">
+                <section className="flex flex-col gap-4 md:flex-row md:items-start">
                     <div className="mx-auto md:mx-0 md:w-[34%] flex justify-center">
-                        <div className="h-28 w-28 md:h-44 md:w-44 rounded-full bg-[var(--gradient-brand)] p-[3px]">
+                        <div className="h-28 w-28 md:h-40 md:w-40 rounded-full bg-[var(--gradient-brand)] p-[3px]">
                             <div className="h-full w-full rounded-full bg-[var(--color-surface)] flex items-center justify-center text-[var(--color-text-on-primary)] text-4xl md:text-6xl font-bold">
                                 {user.profile_picture ? (
                                     <img
@@ -88,18 +88,10 @@ function UserProfile() {
                         </div>
                     </div>
 
-                    <div className="md:w-[66%]">
-                        <div className="flex items-center justify-between md:justify-start md:gap-4">
-                            <h1 className="text-2xl md:text-[2.6rem] font-bold tracking-tight">{user.username || 'username'}</h1>
-                            <button className="rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] p-2.5 hover:bg-[var(--color-hover)] transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-[var(--color-text-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.277c.07.418.363.765.755.898l1.15.39c.395.134.832.042 1.137-.238l.932-.857a1.125 1.125 0 011.591.073l1.833 1.833c.39.39.42 1.01.073 1.591l-.857.932c-.28.305-.372.742-.238 1.137l.39 1.15c.133.392.48.685.898.755l1.277.213c.542.09.94.56.94 1.11v2.593c0 .55-.398 1.02-.94 1.11l-1.277.213a1.125 1.125 0 00-.898.755l-.39 1.15c-.134.395-.042.832.238 1.137l.857.932c.347.581.317 1.201-.073 1.591l-1.833 1.833a1.125 1.125 0 01-1.591.073l-.932-.857a1.125 1.125 0 00-1.137-.238l-1.15.39a1.125 1.125 0 00-.755.898l-.213 1.277c-.09.542-.56.94-1.11.94h-2.593a1.125 1.125 0 01-1.11-.94l-.213-1.277a1.125 1.125 0 00-.755-.898l-1.15-.39a1.125 1.125 0 00-1.137.238l-.932.857a1.125 1.125 0 01-1.591-.073L3.41 19.59a1.125 1.125 0 01-.073-1.591l.857-.932c.28-.305.372-.742.238-1.137l-.39-1.15a1.125 1.125 0 00-.898-.755l-1.277-.213a1.125 1.125 0 01-.94-1.11v-2.593c0-.55.398-1.02.94-1.11l1.277-.213c.418-.07.765-.363.898-.755l.39-1.15a1.125 1.125 0 00-.238-1.137l-.857-.932a1.125 1.125 0 01.073-1.591L5.24 5.483a1.125 1.125 0 011.591-.073l.932.857c.305.28.742.372 1.137.238l1.15-.39c.392-.133.685-.48.755-.898l.213-1.277z" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                            </button>
-                        </div>
+                    <div className="md:w-[46%]">
 
-                        <p className="mt-2 text-lg font-medium">{user.name}</p>
+                        <h1 className="text-lg md:text-[2rem] font-bold tracking-tight">{user.name || 'username'}</h1>
+                        <p className=" text-sm font-medium">{user.username}</p>
 
                         <div className="mt-4 flex items-center gap-6 text-lg">
                             <p><span className="font-semibold">14</span> posts</p>

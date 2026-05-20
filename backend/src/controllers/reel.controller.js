@@ -1,14 +1,14 @@
-const foodModel = require("../models/food.model")
+const reelModel = require("../models/reel.model")
 const likeModel = require("../models/likes.model")
 const saveModel = require("../models/save.model")
 const { uploadFile } = require("../services/storage.service")
 const { v4: uuid } = require("uuid")
 
-async function createFood(req, res) {
+async function createReel(req, res) {
 
     const uploadFileResult = await uploadFile(req.file.buffer, uuid())
 
-    const foodItem = await foodModel.create({
+    const reel = await reelModel.create({
         name: req.body.name,
         description: req.body.description,
         video: uploadFileResult.url,
@@ -16,35 +16,35 @@ async function createFood(req, res) {
     })
 
     res.status(201).json({
-        message: "food item created succesfully",
-        foodItem: foodItem,
+        message: "reel created succesfully",
+        reel: reel,
     })
 }
 
-async function getFoodItems(req, res) {
-    const foodItems = await foodModel.find({});
+async function getReel(req, res) {
+    const reel = await reelModel.find({});
     res.status(200).json({
-        message: "food items fetched successfully",
-        foodItems
+        message: "reels fetched successfully",
+        reel
     })
 }
 
-async function likeFood(req, res) {
+async function likeReel(req, res) {
     try {
-        const { foodId } = req.body
+        const { reelId } = req.body
         const user = req.user;
         const isAlreadyLiked = await likeModel.findOne({
             user: user._id,
-            food: foodId
+            reel: reelId
         })
 
         if (isAlreadyLiked) {
             await likeModel.deleteOne({
                 user: req.user._id,
-                food: foodId
+                reel: reelId
             })
 
-            await foodModel.findByIdAndUpdate(foodId, {
+            await reelModel.findByIdAndUpdate(reelId, {
                 $inc: { likeCount: -1 }
             })
 
@@ -53,10 +53,10 @@ async function likeFood(req, res) {
 
         await likeModel.create({
             user: req.user._id,
-            food: foodId
+            reel: reelId
         })
 
-        await foodModel.findByIdAndUpdate(foodId, {
+        await reelModel.findByIdAndUpdate(reelId, {
             $inc: { likeCount: 1 }
         })
 
@@ -67,45 +67,45 @@ async function likeFood(req, res) {
     }
 }
 
-async function bookmarkFood(req, res) {
-    const { foodId } = req.body
+async function bookmarkReel(req, res) {
+    const { reelId } = req.body
     const user = req.user
 
     const isAlreadySaved = await saveModel.findOne({
         user: user._id,
-        food: foodId
+        reel: reelId
     })
 
     if (isAlreadySaved) {
         await saveModel.deleteOne({
             user: user._id,
-            food: foodId
+            reel: reelId
         })
-        await saveModel.findByIdAndUpdate(foodId, {
+        await saveModel.findByIdAndUpdate(reelId, {
             $inc: { bookmarkCount: -1 }
         })
-        return res.status(201).json({ message: "food unsaved successfully" })
+        return res.status(201).json({ message: "reel unsaved successfully" })
     }
 
     const save = await saveModel.create({
         user: user._id,
-        food: foodId
+        reel: reelId
     })
 
-    await saveModel.findByIdAndUpdate(foodId, {
+    await saveModel.findByIdAndUpdate(reelId, {
         $inc: { bookmarkCount: 1 }
     })
 
     res.status(201).json({
-        message: "food saved successfully",
+        message: "reel saved successfully",
         save
     })
 
 }
 
 module.exports = {
-    createFood,
-    getFoodItems,
-    likeFood,
-    bookmarkFood
+    createReel,
+    getReel,
+    likeReel,
+    bookmarkReel
 }
