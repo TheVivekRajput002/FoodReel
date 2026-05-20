@@ -29,7 +29,7 @@ export default function CreateFoodPage() {
       formData.append("video", video);
 
 
-      const response = await axios.post(`${process.env.VITE_API_URL}/api/food`, formData, { withCredentials: true })
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/food`, formData, { withCredentials: true })
       console.log(response)
 
       if (response.ok) {

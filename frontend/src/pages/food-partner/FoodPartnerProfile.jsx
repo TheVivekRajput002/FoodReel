@@ -11,7 +11,7 @@ export default function FoodPartnerProfile() {
     const [videos, setVideos] = useState([])
 
     useEffect(() => {
-        axios.get(`${process.env.VITE_API_URL}/api/food-partner/${id}`, { withCredentials: true })
+        axios.get(`${import.meta.env.VITE_API_URL}/api/food-partner/${id}`, { withCredentials: true })
             .then(response => {
                 console.log(response.data.foodPartner)
                 setProfile(response.data.foodPartner)
