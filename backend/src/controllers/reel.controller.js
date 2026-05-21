@@ -2,24 +2,28 @@ const reelModel = require("../models/reel.model")
 const likeModel = require("../models/likes.model")
 const savedReelModel = require("../models/savedReel.model")
 const followModel = require("../models/follow.model")
-const { uploadFile } = require("../services/storage.service")
+const { uploadFile, createVideoThumbnail } = require("../services/storage.service")
 const { v4: uuid } = require("uuid")
 
 async function createReel(req, res) {
-
-    const uploadFileResult = await uploadFile(req.file.buffer, uuid())
-    const videoUrl = uploadFileResult.url
-    const thumbnailUrl = buildVideoThumbnailUrl(videoUrl, {
+    const assetId = uuid()
+    const thumbnailId = uuid()
+    const thumbnailBuffer = await createVideoThumbnail(req.file.buffer, thumbnailId, {
         startOffset: 1,
         width: 400,
         height: 400,
     })
 
+    const uploadFileResult = await uploadFile(req.file.buffer, assetId)
+    const thumbnailUploadResult = await uploadFile(thumbnailBuffer, `${thumbnailId}.jpg`)
+    const videoUrl = uploadFileResult.url
+
     const reel = await reelModel.create({
         name: req.body.name,
         description: req.body.description,
-        video: uploadFileResult.url,
-        creator: req.creator._id
+        video: videoUrl,
+        creator: req.creator._id,
+        thumbnail: thumbnailUploadResult.url
     })
 
     res.status(201).json({

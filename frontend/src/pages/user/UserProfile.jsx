@@ -6,7 +6,7 @@ import { Settings } from 'lucide-react'
 const PROFILE_STATS = {
     posts: 14,
     followers: 547,
-    following: 752,
+    following: 5000000000,
 }
 
 const PROFILE_HIGHLIGHTS = [
@@ -71,7 +71,6 @@ function StatItem({ value, label }) {
 function UserProfile() {
     const [user, setUser] = useState(null)
     const [loading, setLoading] = useState(true)
-    const [error, setError] = useState(null)
     const [savedReels, setSavedReels] = useState([])
     const navigate = useNavigate()
 
@@ -82,10 +81,10 @@ function UserProfile() {
                 setLoading(false)
             })
             .catch(() => {
-                setError('Not logged in')
                 setLoading(false)
+                navigate('/user/login', { replace: true })
             })
-    }, [])
+    }, [navigate])
 
     useEffect(() => {
         axios.get(`${import.meta.env.VITE_API_URL}/api/reel/savedReels`, { withCredentials: true })
@@ -93,9 +92,9 @@ function UserProfile() {
                 setSavedReels(response.data.savedReels)
             })
             .catch(() => {
-                setError('Not logged in')
+                navigate('/user/login', { replace: true })
             })
-    }, [])
+    }, [navigate])
 
     console.log(savedReels)
 
@@ -119,25 +118,8 @@ function UserProfile() {
         )
     }
 
-    if (error || !user) {
-        return (
-            <div className="flex h-[100dvh] w-full flex-col bg-[var(--color-bg)]">
-                <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6">
-                    <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[var(--color-surface)]">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-[var(--color-text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                        </svg>
-                    </div>
-                    <p className="text-base font-medium text-[var(--color-text-secondary)]">You are not logged in</p>
-                    <button
-                        onClick={() => navigate('/user/login')}
-                        className="mt-2 rounded-full bg-[var(--color-primary)] px-8 py-2.5 text-sm font-semibold text-[var(--color-text-on-primary)] transition-all active:scale-95"
-                    >
-                        Sign In
-                    </button>
-                </div>
-            </div>
-        )
+    if (!user) {
+        return null
     }
 
     const profileName = user.name || 'Vivek Rajput'

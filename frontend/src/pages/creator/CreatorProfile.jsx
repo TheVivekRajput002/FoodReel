@@ -14,8 +14,9 @@ export default function creatorProfile() {
         axios.get(`${import.meta.env.VITE_API_URL}/api/creator/profile`, { withCredentials: true })
             .then(response => {
                 console.log(response.data.creator)
+                console.log(response.data.reels)
                 setProfile(response.data.creator)
-                setVideos(response.data.creator.reel)
+                setVideos(response.data.creator.reels || [])
             })
             .catch(err => {
                 console.log("here is error in fetching creator", err)
@@ -72,8 +73,8 @@ export default function creatorProfile() {
                         {/* Avatar Section */}
                         <div className="flex-shrink-0">
                             <div className="relative w-32 h-32 rounded-full bg-[var(--gradient-brand)] flex items-center justify-center overflow-hidden border-4 border-[var(--color-surface)] shadow-lg hover:scale-105 transition-transform">
-                                {profile.avatar ? (
-                                    <img src={profile.avatar} alt="Business" className="w-full h-full object-cover" />
+                                {profile.profile_picture ? (
+                                    <img src={profile.profile_picture} alt="Business" className="w-full h-full object-cover" />
                                 ) : (
                                     <div className="text-[var(--color-text-on-primary)] text-5xl flex items-center justify-center">
                                         <svg className="w-16 h-16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -194,11 +195,14 @@ export default function creatorProfile() {
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
                         {videos.map(v => (
                             <div
-                                key={v.id}
+                                key={v._id}
                                 className="group relative rounded-sm overflow-hidden border border-[var(--color-border)] cursor-pointer transition-all duration-300 hover:-translate-y-1 bg-[var(--color-surface-2)]"
                             >
-                                {/* Video Placeholder */}
-                                <video src={v.video} muted></video>
+                                <img
+                                    src={v.thumbnail}
+                                    alt={v.name || "Reel thumbnail"}
+                                    className="aspect-square h-full w-full object-cover"
+                                />
 
                             </div>
                         ))}

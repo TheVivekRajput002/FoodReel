@@ -26,14 +26,12 @@ async function getCreatorById(req, res) {
 
 async function getCreatorProfile(req, res) {
     const creator = req.creator
+    const reels = await reelModel.find({ creator: creator._id }).sort({ createdAt: -1 })
 
     res.status(200).json({
-        creator: {
-            _id: creator._id,
-            name: creator.name,
-            email: creator.email,
-            password: creator.password,
-        }
+        sucess: true,
+        creator: creator,
+        reels: reels
     })
 }
 
@@ -41,17 +39,17 @@ async function followCreator(req, res) {
     const creatorId = req.params.id
     const userId = req.user._id
 
-    const existing = await followModel.findOne({ user:userId, creator:creatorId })
+    const existing = await followModel.findOne({ user: userId, creator: creatorId })
 
     if (existing) {
-        await followModel.deleteOne({ user:userId, creator:creatorId });
-        await userModel.findByIdAndUpdate(userId, { $inc : { followingCount: -1 } })
+        await followModel.deleteOne({ user: userId, creator: creatorId });
+        await userModel.findByIdAndUpdate(userId, { $inc: { followingCount: -1 } })
         return res.json({ success: true, action: "unfollowed" });
 
     } else {
-        
-        await followModel.create({ user:userId, creator:creatorId });
-        await userModel.findByIdAndUpdate(userId, { $inc : { followingCount: +1 } })
+
+        await followModel.create({ user: userId, creator: creatorId });
+        await userModel.findByIdAndUpdate(userId, { $inc: { followingCount: +1 } })
         return res.json({ success: true, action: "followed" });
     }
 }
