@@ -1,6 +1,6 @@
 const reelModel = require("../models/reel.model")
 const likeModel = require("../models/likes.model")
-const saveModel = require("../models/save.model")
+const savedReelModel = require("../models/savedReel.model")
 const followModel = require("../models/follow.model")
 const { uploadFile } = require("../services/storage.service")
 const { v4: uuid } = require("uuid")
@@ -79,45 +79,71 @@ async function likeReel(req, res) {
     }
 }
 
-async function bookmarkReel(req, res) {
-    const { reelId } = req.body
+async function saveReel(req, res) {
+try {
+    
+    const { reelId } = req.params
     const user = req.user
-
-    const isAlreadySaved = await saveModel.findOne({
+    
+    const isAlreadySaved = await savedReelModel.findOne({
         user: user._id,
         reel: reelId
     })
-
+    
     if (isAlreadySaved) {
-        await saveModel.deleteOne({
+        await savedReelModel.deleteOne({
             user: user._id,
             reel: reelId
         })
-        await saveModel.findByIdAndUpdate(reelId, {
+        await reelModel.findByIdAndUpdate(reelId, {
             $inc: { bookmarkCount: -1 }
         })
-        return res.status(201).json({ message: "reel unsaved successfully" })
+        return res.status(200).json({ message: "reel unsaved successfully" })
     }
-
-    const save = await saveModel.create({
+    
+    const save = await savedReelModel.create({
         user: user._id,
         reel: reelId
     })
-
-    await saveModel.findByIdAndUpdate(reelId, {
+    
+    await reelModel.findByIdAndUpdate(reelId, {
         $inc: { bookmarkCount: 1 }
     })
-
+    
     res.status(201).json({
         message: "reel saved successfully",
         save
     })
+} catch (error) {
+    console.log("there is some error in saving unsaving reel", error)
+}
 
+
+}
+
+async function getSavedReels(req,res){
+    try {
+        
+        const userId = req.user._id
+    
+        const savedReels = await savedReelModel.find({user: userId})
+    
+        res.status(200).json({
+            success: true,
+            savedReels: savedReels
+        })
+    } catch (error) {
+        res.status(400).json({
+            success: false,
+            error: error
+        })
+    }
 }
 
 module.exports = {
     createReel,
     getReel,
     likeReel,
-    bookmarkReel
+    saveReel,
+    getSavedReels
 }

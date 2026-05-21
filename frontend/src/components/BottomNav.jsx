@@ -74,7 +74,7 @@ function BottomNav({ canCreate, onCreateClick }) {
     ]
 
     return (
-        <nav className="w-full bg-[var(--color-navbar-bg)] backdrop-blur-md border-t border-[var(--color-navbar-border)] px-6 py-2 flex items-center justify-around z-50 shrink-0">
+        <nav className="w-full bg-[var(--color-navbar-bg)] backdrop-blur-md border-t border-[var(--color-navbar-border)] px-6 py-4 flex items-center justify-around z-50 shrink-0">
             {tabs.map(tab => {
                 if (tab.isCreateAction) {
                     return (
@@ -82,10 +82,10 @@ function BottomNav({ canCreate, onCreateClick }) {
                             key={tab.name}
                             type="button"
                             onClick={onCreateClick}
-                            className="flex flex-col items-center gap-1 transition-colors text-[var(--color-tab-inactive)] hover:text-[var(--color-text-secondary)]"
+                            className="flex flex-col items-center gap-1 text-[var(--color-text-on-primary)] transition-colors hover:text-[var(--color-text-on-primary)]"
                         >
                             {tab.icon(false)}
-                            <span className="text-[10px] font-medium">{tab.name}</span>
+                            {/* <span className="text-[10px] font-medium">{tab.name}</span> */}
                         </button>
                     )
                 }
@@ -95,10 +95,10 @@ function BottomNav({ canCreate, onCreateClick }) {
                     <Link
                         key={tab.name}
                         to={tab.path}
-                        className={`flex flex-col items-center gap-1 transition-colors ${isActive ? 'text-[var(--color-text-primary)]' : 'text-[var(--color-tab-inactive)] hover:text-[var(--color-text-secondary)]'}`}
+                        className="flex flex-col items-center gap-1 text-[var(--color-text-on-primary)] transition-colors hover:text-[var(--color-text-on-primary)]"
                     >
                         {tab.icon(isActive)}
-                        <span className="text-[10px] font-medium">{tab.name}</span>
+                        {/* <span className="text-[10px] font-medium">{tab.name}</span> */}
                     </Link>
                 )
             })}

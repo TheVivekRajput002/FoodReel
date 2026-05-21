@@ -70,7 +70,7 @@ function UserProfile() {
 
     return (
         <div className="min-h-[100dvh] w-full bg-[var(--color-bg)] text-[var(--color-text-primary)]">
-            <div className="mx-auto w-full max-w-[980px] px-4 pb-24 pt-8 md:px-8 md:pb-10 md:pt-12">
+            <div className="mx-auto w-full max-w-[980px] px-8 pb-24 pt-8 md:px-8 md:pb-10 md:pt-12">
                 <section className="flex flex-col gap-4 md:flex-row md:items-start">
                     <div className="mx-auto md:mx-0 md:w-[34%] flex justify-center">
                         <div className="h-28 w-28 md:h-40 md:w-40 rounded-full bg-[var(--gradient-brand)] p-[3px]">

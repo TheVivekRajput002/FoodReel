@@ -12,7 +12,8 @@ const upload = multer({
 router.post("/", authMiddleware.authCreatorMiddleware, upload.single("video"), reelController.createReel)
 router.get("/", authMiddleware.authUserMiddleware, reelController.getReel)
 router.post("/like", authMiddleware.authUserMiddleware, reelController.likeReel)
-router.post("/bookmark", authMiddleware.authUserMiddleware, reelController.bookmarkReel)
+router.post("/:reelId/save", authMiddleware.authUserMiddleware, reelController.saveReel)
+router.get("/savedReels", authMiddleware.authUserMiddleware, reelController.getSavedReels)
 
 
 module.exports = router;
