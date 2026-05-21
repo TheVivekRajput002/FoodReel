@@ -72,7 +72,7 @@ function UserProfile() {
     const [user, setUser] = useState(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
-    const [savedReels, setSavedReels] = useState({})
+    const [savedReels, setSavedReels] = useState([])
     const navigate = useNavigate()
 
     useEffect(() => {
@@ -87,15 +87,17 @@ function UserProfile() {
             })
     }, [])
 
-    // useEffect(() => {
-    //     axios.get(`${import.meta.env.VITE_API_URL}/api/reel/savedReels`)
-    //         .then(response => {
-    //             setSavedReels(response.data.savedReels)
-    //         })
-    //         .catch(() => {
-    //             setError('Not logged in')
-    //         })
-    // })
+    useEffect(() => {
+        axios.get(`${import.meta.env.VITE_API_URL}/api/reel/savedReels`, { withCredentials: true })
+            .then(response => {
+                setSavedReels(response.data.savedReels)
+            })
+            .catch(() => {
+                setError('Not logged in')
+            })
+    }, [])
+
+    console.log(savedReels)
 
     const handleLogout = async () => {
         try {
@@ -291,9 +293,9 @@ function UserProfile() {
                 </section>
 
                 <section className="grid grid-cols-3 gap-[1px] bg-[var(--color-border)]">
-                    {PROFILE_POSTS.map((item) => (
-                        <div key={item.id} className="relative aspect-square overflow-hidden bg-[var(--color-surface)]">
-                            <img src={item.image} alt={`Post ${item.id}`} className="h-full w-full object-cover" />
+                    {savedReels.map((item) => (
+                        <div key={item._id} className="relative aspect-square overflow-hidden bg-[var(--color-surface)]">
+                            <img src={item.reel.thumbnail}  alt={`Post ${item.reel.name}`} className="h-full w-full object-cover" />
                             <div className="absolute right-2 top-2 h-4 w-4 rounded-[4px] border-2 border-white/95" />
                         </div>
                     ))}

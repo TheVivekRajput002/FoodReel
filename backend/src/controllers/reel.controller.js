@@ -8,6 +8,12 @@ const { v4: uuid } = require("uuid")
 async function createReel(req, res) {
 
     const uploadFileResult = await uploadFile(req.file.buffer, uuid())
+    const videoUrl = uploadFileResult.url
+    const thumbnailUrl = buildVideoThumbnailUrl(videoUrl, {
+        startOffset: 1,
+        width: 400,
+        height: 400,
+    })
 
     const reel = await reelModel.create({
         name: req.body.name,
@@ -80,54 +86,54 @@ async function likeReel(req, res) {
 }
 
 async function saveReel(req, res) {
-try {
-    
-    const { reelId } = req.params
-    const user = req.user
-    
-    const isAlreadySaved = await savedReelModel.findOne({
-        user: user._id,
-        reel: reelId
-    })
-    
-    if (isAlreadySaved) {
-        await savedReelModel.deleteOne({
+    try {
+
+        const { reelId } = req.params
+        const user = req.user
+
+        const isAlreadySaved = await savedReelModel.findOne({
             user: user._id,
             reel: reelId
         })
-        await reelModel.findByIdAndUpdate(reelId, {
-            $inc: { bookmarkCount: -1 }
+
+        if (isAlreadySaved) {
+            await savedReelModel.deleteOne({
+                user: user._id,
+                reel: reelId
+            })
+            await reelModel.findByIdAndUpdate(reelId, {
+                $inc: { bookmarkCount: -1 }
+            })
+            return res.status(200).json({ message: "reel unsaved successfully" })
+        }
+
+        const save = await savedReelModel.create({
+            user: user._id,
+            reel: reelId
         })
-        return res.status(200).json({ message: "reel unsaved successfully" })
+
+        await reelModel.findByIdAndUpdate(reelId, {
+            $inc: { bookmarkCount: 1 }
+        })
+
+        res.status(201).json({
+            message: "reel saved successfully",
+            save
+        })
+    } catch (error) {
+        console.log("there is some error in saving unsaving reel", error)
     }
-    
-    const save = await savedReelModel.create({
-        user: user._id,
-        reel: reelId
-    })
-    
-    await reelModel.findByIdAndUpdate(reelId, {
-        $inc: { bookmarkCount: 1 }
-    })
-    
-    res.status(201).json({
-        message: "reel saved successfully",
-        save
-    })
-} catch (error) {
-    console.log("there is some error in saving unsaving reel", error)
-}
 
 
 }
 
-async function getSavedReels(req,res){
+async function getSavedReels(req, res) {
     try {
-        
+
         const userId = req.user._id
-    
-        const savedReels = await savedReelModel.find({user: userId})
-    
+
+        const savedReels = await savedReelModel.find({ user: userId }).populate("reel")
+
         res.status(200).json({
             success: true,
             savedReels: savedReels

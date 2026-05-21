@@ -24,6 +24,10 @@ const reelSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
+    thumbnail: {
+        type:String,
+        required: true
+    },
 })
 
 const reelModel = mongoose.model("reel", reelSchema)
