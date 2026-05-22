@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { Eye, EyeOff, Lock, LogIn, Mail } from 'lucide-react'
 import { useToast } from '../../context/ToastContext'
@@ -183,6 +183,21 @@ function UserLogin() {
                         <SocialAppleIcon />
                     </button>
                 </div>
+
+                <footer className="text-center space-y-1.5 mt-5">
+                    <p className="text-xs text-slate-500">
+                        Don&apos;t have an account?{' '}
+                        <Link to="/user/register" className="text-slate-800 font-semibold hover:underline">
+                            Create an account
+                        </Link>
+                    </p>
+                    <p className="text-[10px] text-slate-400">
+                        Restaurant?{' '}
+                        <Link to="/creator/login" className="text-sky-600 font-semibold hover:underline">
+                            Sign in as Creator
+                        </Link>
+                    </p>
+                </footer>
             </main>
         </div>
     )
