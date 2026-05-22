@@ -15,19 +15,10 @@ function SocialGoogleIcon() {
     )
 }
 
-function SocialFacebookIcon() {
-    return (
-        <svg height="20" viewBox="0 0 48 48" width="20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M24 5A19 19 0 1 0 24 43A19 19 0 1 0 24 5Z" fill="#039be5" />
-            <path d="M26.572 29.036h4.917l.772-4.995h-5.69v-2.73c0-2.075.678-3.915 2.619-3.915h3.119v-4.359c-.548-.074-1.707-.236-3.897-.236-4.573 0-7.254 2.415-7.254 8.23v3.01h-4.37v4.995h4.37v11.666c.895.14 1.812.214 2.744.214c.813 0 1.61-.057 2.392-.162V29.036Z" fill="#fff" />
-        </svg>
-    )
-}
-
-function SocialAppleIcon() {
+function SocialGitHubIcon() {
     return (
         <svg fill="currentColor" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M17.05 20.28c-.96.78-2.1 1.24-3.3 1.24-1.28 0-2.08-.34-2.84-.34-.76 0-1.64.34-2.85.34-1.4 0-2.62-.64-3.72-2C2.1 16.74 1.44 13.52 2.3 11.2c.54-1.52 1.84-2.48 3.3-2.48.96 0 1.76.44 2.44.44.66 0 1.62-.5 2.82-.5 1.52 0 2.8.76 3.56 1.96-3.1 1.34-2.6 5.5.6 6.84-.54 1.3-1.2 2.1-1.97 2.82zM12.03 7.25c-.02-2.3 1.9-4.22 4.22-4.25.02 2.22-1.88 4.25-4.22 4.25z" />
+            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
         </svg>
     )
 }
@@ -131,36 +122,31 @@ function UserRegister() {
                     </button>
                 </form>
 
-                <div className="flex items-center my-3">
-                    <div className="flex-grow border-t border-slate-200" />
-                    <span className="px-3 text-[10px] font-medium uppercase tracking-wide text-slate-400">or continue with</span>
-                    <div className="flex-grow border-t border-slate-200" />
+                <div className="mt-5 mb-4 relative">
+                    <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-dotted border-slate-200" />
+                    </div>
+                    <div className="relative flex justify-center text-xs">
+                        <span className="px-3 bg-white text-slate-400 uppercase tracking-widest">Or sign up with</span>
+                    </div>
                 </div>
 
-                <div className="flex justify-center gap-2.5 mb-3">
+                <div className="grid grid-cols-2 gap-3 mb-3">
                     <button
                         type="button"
                         onClick={handleSocialClick}
+                        className="flex justify-center items-center py-2 border border-slate-100 rounded-xl hover:bg-slate-50 transition-colors shadow-sm"
                         aria-label="Sign up with Google"
-                        className="w-10 h-10 rounded-xl border border-slate-200 bg-white/60 flex items-center justify-center hover:bg-white transition-colors"
                     >
                         <SocialGoogleIcon />
                     </button>
                     <button
                         type="button"
                         onClick={handleSocialClick}
-                        aria-label="Sign up with Facebook"
-                        className="w-10 h-10 rounded-xl border border-slate-200 bg-white/60 flex items-center justify-center hover:bg-white transition-colors"
+                        className="flex justify-center items-center py-2 border border-slate-100 rounded-xl hover:bg-slate-50 transition-colors shadow-sm text-slate-900"
+                        aria-label="Sign up with GitHub"
                     >
-                        <SocialFacebookIcon />
-                    </button>
-                    <button
-                        type="button"
-                        onClick={handleSocialClick}
-                        aria-label="Sign up with Apple"
-                        className="w-10 h-10 rounded-xl border border-slate-200 bg-white/60 flex items-center justify-center hover:bg-white transition-colors text-slate-800"
-                    >
-                        <SocialAppleIcon />
+                        <SocialGitHubIcon />
                     </button>
                 </div>
 
