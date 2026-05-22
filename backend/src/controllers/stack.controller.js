@@ -3,7 +3,20 @@ const cardModel = require("../models/card.model")
 
 async function createStack(req, res) {
     const creator = req.creator
-    const { title, author, cover, insightTitle, insightOne } = req.body
+    const { title, author, cover, cards, insightTitle, insightOne } = req.body
+
+    const cardsPayload = Array.isArray(cards) && cards.length > 0
+        ? cards
+        : insightTitle && insightOne
+            ? [{ head: insightTitle, content: insightOne }]
+            : []
+
+    if (!cardsPayload.length) {
+        return res.status(400).json({
+            success: false,
+            error: "At least one insight card is required"
+        })
+    }
 
     try {
 
@@ -14,15 +27,19 @@ async function createStack(req, res) {
             coverImage: cover
         })
 
-        const card = await cardModel.create({
-            stackId: stack._id,
-            order: 1,
-            head: insightTitle,
-            content: insightOne
-        })
+        const createdCards = await Promise.all(
+            cardsPayload.map((card, index) =>
+                cardModel.create({
+                    stackId: stack._id,
+                    order: index + 1,
+                    head: card.head,
+                    content: card.content
+                })
+            )
+        )
 
         const newStack = await stackModel.findByIdAndUpdate(stack._id, {
-            cards: [card._id]
+            cards: createdCards.map((card) => card._id)
         }, { new: true })
 
         res.status(201).json({

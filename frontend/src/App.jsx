@@ -1,14 +1,14 @@
 import AppRoutes from './routes/AppRoutes'
+import { ToastProvider } from './context/ToastContext'
 import './App.css'
 
 
 function App() {
 
   return (
-    <>
-    <AppRoutes />
-
-    </>
+    <ToastProvider>
+      <AppRoutes />
+    </ToastProvider>
   )
 }
 

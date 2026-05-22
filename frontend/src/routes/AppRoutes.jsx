@@ -17,6 +17,7 @@ import Search from '../pages/Search';
 import StackScroll from '../pages/stack/StackScroll';
 import StackDetail from '../pages/stack/StackDetail';
 import StackCreate from '../pages/stack/StackCreate';
+import Achievements from '../pages/Achievements';
 
 import Layout from '../components/Layout';
 import ProtectedRoute from '../components/ProtectedRoute';
@@ -45,6 +46,7 @@ function AppRoutes() {
             <Route path='/creator/profile' element={<CreatorProfile />} />
             <Route path='/creator/reels' element={<CreatorReels />} />
             <Route path='/create-reel' element={<CreateReel />} />
+            <Route path='/achievements' element={<Achievements />} />
           </Route>
           {/* ChatThread has its own custom TopBar + input bar, no BottomNav needed */}
           <Route path='/messages/:conversationId' element={<ChatThread />} />

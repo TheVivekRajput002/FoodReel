@@ -24,8 +24,6 @@ userBadgeSchema.index(
     { unique: true }
 );
 
-const UserBadge =
-    mongoose.models.UserBadge ||
-    mongoose.model("UserBadge", userBadgeSchema);
+const userBadgeModel = mongoose.model("userBadge", userBadgeSchema);
 
-module.exports = UserBadge;
+module.exports = userBadgeModel;

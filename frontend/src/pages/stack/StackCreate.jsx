@@ -1,17 +1,22 @@
 import { useMemo, useState } from 'react'
-import { BookOpenText, Bookmark, Eye, Headphones, ImagePlus, PenLine, Share2 } from 'lucide-react'
+import { BookOpenText, Bookmark, Eye, Headphones, ImagePlus, PenLine, Plus, Share2, Trash2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import axios from "axios"
+import { useToast } from '../../context/ToastContext'
 
 const DEFAULT_COVER =
     'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=900&q=80'
+
+const EMPTY_CARD = {
+    insightTitle: '',
+    insightOne: '',
+}
 
 const INITIAL_FORM = {
     title: '',
     author: '',
     cover: DEFAULT_COVER,
-    insightTitle: '',
-    insightOne: '',
+    cards: [{ ...EMPTY_CARD }],
 }
 
 function BookCover({ cover }) {
@@ -43,8 +48,26 @@ function FormField({ label, children, hint }) {
     )
 }
 
-function getPreviewParagraphs(form) {
-    return [form.insightOne].filter(Boolean)
+function formatPreviewParagraph(content) {
+    if (!content) {
+        return null
+    }
+
+    const firstSentenceEnd = content.indexOf('. ')
+
+    if (firstSentenceEnd === -1) {
+        return content
+    }
+
+    const firstSentence = content.slice(0, firstSentenceEnd + 1)
+    const rest = content.slice(firstSentenceEnd + 2)
+
+    return (
+        <>
+            <strong className="font-semibold">{firstSentence}</strong>
+            {rest ? ` ${rest}` : null}
+        </>
+    )
 }
 
 function StackDetailPreview({ stack }) {
@@ -79,56 +102,48 @@ function StackDetailPreview({ stack }) {
                 </div>
             </header>
 
-            <div className="mt-10 w-full max-w-xl">
-                <article className="rounded-[28px] border border-[var(--color-border)] bg-[var(--color-card)] p-6 shadow-[var(--shadow-md)] sm:p-8">
-                    <header>
-                        <h2 className="text-2xl font-bold tracking-tight text-[var(--color-text-primary)]">
-                            {stack.insightTitle}
-                        </h2>
-                    </header>
+            <div className="mt-10 w-full max-w-xl space-y-6">
+                {stack.cards.map((card, index) => (
+                    <article
+                        key={`preview-card-${index}`}
+                        className="rounded-[28px] border border-[var(--color-border)] bg-[var(--color-card)] p-6 shadow-[var(--shadow-md)] sm:p-8"
+                    >
+                        <header>
+                            <h2 className="text-2xl font-bold tracking-tight text-[var(--color-text-primary)]">
+                                {card.insightTitle}
+                            </h2>
+                        </header>
 
-                    <section className="mt-5 space-y-5 font-serif text-[1rem] leading-7 text-[var(--color-text-primary)] sm:text-[1.05rem]">
-                        {stack.paragraphs.map((paragraph, index) => (
-                            <p key={`preview-paragraph-${index}`}>
-                                {index === 0 ? (
-                                    <>
-                                        <strong className="font-semibold">
-                                            {paragraph.split('. ')[0]}.
-                                        </strong>{' '}
-                                        {paragraph.includes('. ') ? paragraph.slice(paragraph.indexOf('. ') + 2) : ''}
-                                    </>
-                                ) : (
-                                    paragraph
-                                )}
-                            </p>
-                        ))}
-                    </section>
+                        <section className="mt-5 space-y-5 font-serif text-[1rem] leading-7 text-[var(--color-text-primary)] sm:text-[1.05rem]">
+                            <p>{formatPreviewParagraph(card.content)}</p>
+                        </section>
 
-                    <footer className="mt-8 flex items-center justify-between gap-4 border-t border-[var(--color-divider)] pt-5 text-[var(--color-text-muted)]">
-                        <div className="flex items-center gap-2 text-sm font-semibold">
-                            <Eye className="h-5 w-5" />
-                            <span>Preview</span>
-                        </div>
+                        <footer className="mt-8 flex items-center justify-between gap-4 border-t border-[var(--color-divider)] pt-5 text-[var(--color-text-muted)]">
+                            <div className="flex items-center gap-2 text-sm font-semibold">
+                                <Eye className="h-5 w-5" />
+                                <span>Preview</span>
+                            </div>
 
-                        <div className="flex items-center gap-4">
-                            <button
-                                type="button"
-                                className="transition hover:text-[var(--color-text-primary)]"
-                                aria-label="Share stack preview"
-                            >
-                                <Share2 className="h-5 w-5" />
-                            </button>
-                            <button
-                                type="button"
-                                className="flex items-center gap-1.5 transition hover:text-[var(--color-text-primary)]"
-                                aria-label="Saved count preview"
-                            >
-                                <Bookmark className="h-5 w-5" />
-                                <span className="text-sm font-semibold">Draft</span>
-                            </button>
-                        </div>
-                    </footer>
-                </article>
+                            <div className="flex items-center gap-4">
+                                <button
+                                    type="button"
+                                    className="transition hover:text-[var(--color-text-primary)]"
+                                    aria-label="Share stack preview"
+                                >
+                                    <Share2 className="h-5 w-5" />
+                                </button>
+                                <button
+                                    type="button"
+                                    className="flex items-center gap-1.5 transition hover:text-[var(--color-text-primary)]"
+                                    aria-label="Saved count preview"
+                                >
+                                    <Bookmark className="h-5 w-5" />
+                                    <span className="text-sm font-semibold">Draft</span>
+                                </button>
+                            </div>
+                        </footer>
+                    </article>
+                ))}
             </div>
         </div>
     )
@@ -136,44 +151,55 @@ function StackDetailPreview({ stack }) {
 
 export default function StackCreate() {
     const navigate = useNavigate()
+    const { showToast } = useToast()
     const isCreator = localStorage.getItem('scs_role') === 'creator'
     const [form, setForm] = useState(INITIAL_FORM)
-    const [message, setMessage] = useState('')
 
     const handleSubmit = async (event) => {
         event.preventDefault()
 
+        const payload = {
+            title: form.title,
+            author: form.author,
+            cover: form.cover,
+            cards: form.cards.map((card) => ({
+                head: card.insightTitle,
+                content: card.insightOne,
+            })),
+        }
+
         try {
-            await axios.post(`${import.meta.env.VITE_API_URL}/api/stack/create`, form, {
+            await axios.post(`${import.meta.env.VITE_API_URL}/api/stack/create`, payload, {
                 withCredentials: true,
             })
 
-            setMessage('Stack created successfully.')
+            setForm({
+                ...INITIAL_FORM,
+                cards: [{ ...EMPTY_CARD }],
+            })
+            showToast('Stack created successfully.', 'success')
         } catch (error) {
             console.log("error in sending stack data", error)
-            setMessage('Unable to create stack right now.')
+            showToast('Unable to create stack right now.', 'error')
         }
     }
 
     const preview = useMemo(() => {
         const title = form.title.trim() || 'Your next stack title'
         const author = form.author.trim() || 'Your name'
-        const insightTitle = form.insightTitle.trim() || 'Your core insight'
-        const paragraphs = getPreviewParagraphs(form)
+        const cover = form.cover.trim() || DEFAULT_COVER
 
-        return {
-            title,
-            author,
-            cover: form.cover.trim() || DEFAULT_COVER,
-            insightTitle,
-            paragraphs: paragraphs.length
-                ? paragraphs
-                : [
-                    'Start by capturing the main lesson readers should remember after opening this stack.',
-                    'Use the second paragraph to explain why the idea matters and how it shows up in real life.',
-                    'Close with a sharp final thought, quote, or takeaway that leaves the stack feeling complete.',
-                ],
-        }
+        const cards = form.cards.map((card, index) => {
+            const insightTitle = card.insightTitle.trim() || `Insight ${index + 1}`
+            const content = card.insightOne.trim()
+
+            return {
+                insightTitle,
+                content: content || 'Start by capturing the main lesson readers should remember after opening this stack.',
+            }
+        })
+
+        return { title, author, cover, cards }
     }, [form])
 
     if (!isCreator) {
@@ -204,9 +230,30 @@ export default function StackCreate() {
             ...current,
             [name]: value,
         }))
-        setMessage('')
     }
 
+    const handleCardChange = (index, field, value) => {
+        setForm((current) => ({
+            ...current,
+            cards: current.cards.map((card, cardIndex) =>
+                cardIndex === index ? { ...card, [field]: value } : card
+            ),
+        }))
+    }
+
+    const addCard = () => {
+        setForm((current) => ({
+            ...current,
+            cards: [...current.cards, { ...EMPTY_CARD }],
+        }))
+    }
+
+    const removeCard = (index) => {
+        setForm((current) => ({
+            ...current,
+            cards: current.cards.filter((_, cardIndex) => cardIndex !== index),
+        }))
+    }
 
     return (
         <div className="min-h-[100dvh] bg-[var(--color-bg)] px-4 py-4 text-[var(--color-text-primary)] md:px-6 md:py-6">
@@ -289,36 +336,79 @@ export default function StackCreate() {
                             </FormField>
                         </div>
 
-                        <div className="mt-5">
-                            <FormField label="Insight headline">
-                                <input
-                                    type="text"
-                                    name="insightTitle"
-                                    value={form.insightTitle}
-                                    onChange={handleChange}
-                                    placeholder="Identity Drives Behavior"
-                                    className="w-full rounded-2xl border border-[var(--color-input-border)] bg-[var(--color-input-bg)] px-4 py-3 text-sm outline-none transition focus:border-[var(--color-input-focus)] focus:ring-4 focus:ring-[var(--color-focus-ring)]"
-                                    required
-                                />
-                            </FormField>
-                        </div>
+                        <div className="mt-8 space-y-5">
+                            <div className="flex items-center justify-between gap-4">
+                                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-primary)]">
+                                    Insight Cards
+                                </p>
+                                <button
+                                    type="button"
+                                    onClick={addCard}
+                                    className="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2 text-sm font-semibold text-[var(--color-text-primary)] transition hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
+                                >
+                                    <Plus className="h-4 w-4" />
+                                    Add card
+                                </button>
+                            </div>
 
-                        <div className="mt-5 space-y-5">
-                            <FormField
-                                label="Insight paragraph 1"
-                                hint="The first sentence is highlighted in the preview, just like the current stack detail page."
-                            >
-                                <textarea
-                                    name="insightOne"
-                                    value={form.insightOne}
-                                    onChange={handleChange}
-                                    rows="4"
-                                    placeholder="Lasting change gets easier when habits become evidence for the kind of person you believe you are."
-                                    className="w-full rounded-2xl border border-[var(--color-input-border)] bg-[var(--color-input-bg)] px-4 py-3 text-sm leading-7 outline-none transition focus:border-[var(--color-input-focus)] focus:ring-4 focus:ring-[var(--color-focus-ring)]"
-                                    required
-                                />
-                            </FormField>
-                  
+                            {form.cards.map((card, index) => (
+                                <div
+                                    key={`card-form-${index}`}
+                                    className="rounded-[24px] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 sm:p-5"
+                                >
+                                    <div className="mb-4 flex items-center justify-between gap-3">
+                                        <p className="text-sm font-semibold text-[var(--color-text-primary)]">
+                                            Card {index + 1}
+                                        </p>
+                                        {form.cards.length > 1 ? (
+                                            <button
+                                                type="button"
+                                                onClick={() => removeCard(index)}
+                                                className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-[var(--color-text-secondary)] transition hover:bg-[var(--color-card)] hover:text-[var(--color-text-primary)]"
+                                                aria-label={`Remove card ${index + 1}`}
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                                Remove
+                                            </button>
+                                        ) : null}
+                                    </div>
+
+                                    <div className="space-y-5">
+                                        <FormField label="Insight headline">
+                                            <input
+                                                type="text"
+                                                value={card.insightTitle}
+                                                onChange={(event) =>
+                                                    handleCardChange(index, 'insightTitle', event.target.value)
+                                                }
+                                                placeholder="Identity Drives Behavior"
+                                                className="w-full rounded-2xl border border-[var(--color-input-border)] bg-[var(--color-input-bg)] px-4 py-3 text-sm outline-none transition focus:border-[var(--color-input-focus)] focus:ring-4 focus:ring-[var(--color-focus-ring)]"
+                                                required
+                                            />
+                                        </FormField>
+
+                                        <FormField
+                                            label="Insight paragraph"
+                                            hint={
+                                                index === 0
+                                                    ? 'The first sentence is highlighted in the preview, just like the current stack detail page.'
+                                                    : undefined
+                                            }
+                                        >
+                                            <textarea
+                                                value={card.insightOne}
+                                                onChange={(event) =>
+                                                    handleCardChange(index, 'insightOne', event.target.value)
+                                                }
+                                                rows="4"
+                                                placeholder="Lasting change gets easier when habits become evidence for the kind of person you believe you are."
+                                                className="w-full rounded-2xl border border-[var(--color-input-border)] bg-[var(--color-input-bg)] px-4 py-3 text-sm leading-7 outline-none transition focus:border-[var(--color-input-focus)] focus:ring-4 focus:ring-[var(--color-focus-ring)]"
+                                                required
+                                            />
+                                        </FormField>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
 
                         <div className="mt-6 rounded-[24px] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-[var(--shadow-xs)]">
@@ -328,7 +418,7 @@ export default function StackCreate() {
                                         Ready to publish this stack?
                                     </p>
                                     <p className="mt-1 text-[13px] text-[var(--color-text-secondary)]">
-                                        The layout is in place. Submit can be connected once stack creation is supported in the API.
+                                        {form.cards.length} insight card{form.cards.length === 1 ? '' : 's'} will be published with this stack.
                                     </p>
                                 </div>
                                 <button
@@ -338,12 +428,6 @@ export default function StackCreate() {
                                     Create Stack
                                 </button>
                             </div>
-
-                            {message ? (
-                                <p className="mt-4 text-[13px] font-medium text-[var(--color-text-secondary)]">
-                                    {message}
-                                </p>
-                            ) : null}
                         </div>
                     </form>
                 </div>

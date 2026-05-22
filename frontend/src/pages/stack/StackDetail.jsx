@@ -118,7 +118,7 @@ export default function StackDetail() {
                     </div>
                 </header>
 
-                <div className="mt-10 w-full max-w-xl">
+                <div className="mt-10 w-full max-w-xl flex flex-col gap-4">
                     {
                         (stack.cards ?? []).map(card => (
                             <article className="rounded-[28px] border border-[var(--color-border)] bg-[var(--color-card)] p-6 shadow-[var(--shadow-md)] sm:p-8">

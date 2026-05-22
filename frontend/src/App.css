@@ -1,4 +1,4 @@
-﻿@import "tailwindcss";
+@import "tailwindcss";
 
 :root {
     /* ================================================
@@ -415,5 +415,21 @@
     --color-navbar-border: hsl(20 12% 15%);
     --color-sidebar-bg: hsl(20 10% 9%);
     --color-tab-inactive: hsl(30 8% 65%);
+}
+
+@keyframes toast-enter {
+    from {
+        opacity: 0;
+        transform: translateY(0.5rem);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.toast-enter {
+    animation: toast-enter 0.25s ease-out;
 }
 

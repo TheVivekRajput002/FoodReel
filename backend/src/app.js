@@ -6,6 +6,7 @@ const stackRoutes = require("./routes/stack.route")
 const userRoutes = require("./routes/user.route")
 const reelRoutes = require("./routes/reel.route")
 const creatorRoutes = require("./routes/creator.route")
+const badgeRoutes = require("./routes/badge.route")
 const cors = require("cors")
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
@@ -52,6 +53,7 @@ app.use("/api/user", userRoutes)
 app.use("/api/reel", reelRoutes)
 app.use("/api/stack", stackRoutes)
 app.use("/api/creator", creatorRoutes)
+app.use("/api/badge", badgeRoutes)
 
 module.exports = app;
 

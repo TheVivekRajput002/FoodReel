@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { BookOpenText, House, MessageCircle, Plus, Search, User, Video } from 'lucide-react';
+import { BookOpenText, House, MessageCircle, Plus, Search, Trophy, User, Video } from 'lucide-react';
 
 export default function DesktopSidebar({ canCreate, onCreateClick, themeMode, onToggleTheme }) {
     const { pathname } = useLocation();
@@ -18,6 +18,7 @@ export default function DesktopSidebar({ canCreate, onCreateClick, themeMode, on
             { name: 'Home', path: '/', icon: House },
             { name: 'Search', path: '/search', icon: Search },
             { name: 'Stack', path: '/stack', icon: BookOpenText },
+            { name: 'Achievements', path: '/achievements', icon: Trophy },
             { name: 'Messages', path: '/messages', icon: MessageCircle },
             { name: 'Profile', path: profilePath, icon: User },
         ];

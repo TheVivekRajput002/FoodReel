@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { BookOpenText, House, MessageCircle, Plus, Search, User, Video } from 'lucide-react'
+import { BookOpenText, House, MessageCircle, Plus, Search, Trophy, User, Video } from 'lucide-react'
 
 function BottomNav({ canCreate, onCreateClick }) {
     const location = useLocation()
@@ -57,6 +57,11 @@ function BottomNav({ canCreate, onCreateClick }) {
                 name: 'stack',
                 path: '/stack',
                 icon: () => <BookOpenText className="h-6 w-6" />,
+            },
+            {
+                name: 'achievements',
+                path: '/achievements',
+                icon: () => <Trophy className="h-6 w-6" />,
             },
             {
                 name: 'messages',
