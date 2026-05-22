@@ -39,24 +39,44 @@ async function createStack(req, res) {
     }
 }
 
-async function getStacks(req,res){
-    
+async function getStacks(req, res) {
+
     try {
         const stack = await stackModel.find().populate("creator")
         res.status(200).json({
             success: true,
             stack: stack
         })
-        
+
     } catch (error) {
-        
+
         res.status(400).json({
             success: false
         })
     }
 }
 
+async function getStackDetail(req, res) {
+
+    const stackId = req.params.id
+    try {
+        const stackDetail = await stackModel.findById(stackId).populate("cards")
+
+        res.status(200).json({
+            success: true,
+            stackDetail: stackDetail
+        })
+    } catch (error) {
+        res.status(404).json({
+            success: false,
+            error: error
+        })
+
+    }
+}
+
 module.exports = {
     createStack,
-    getStacks
+    getStacks,
+    getStackDetail
 }

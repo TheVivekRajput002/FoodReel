@@ -1,6 +1,8 @@
 import { Bookmark, Eye, Headphones, PenLine, Share2 } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { getStackById } from './stackData'
+import axios from "axios"
+import { useEffect, useState } from 'react'
 
 function BookCover({ title, author, cover }) {
     return (
@@ -24,9 +26,41 @@ function BookCover({ title, author, cover }) {
 export default function StackDetail() {
     const navigate = useNavigate()
     const { id } = useParams()
+    const [stack, setStack] = useState(null)
+    const [loading, setLoading] = useState(true)
 
-    const stack = getStackById(id)
-    
+    useEffect(() => {
+        setLoading(true)
+
+        axios.get(`${import.meta.env.VITE_API_URL}/api/stack/${id}`, {
+            withCredentials: true
+        })
+            .then(response => {
+                setStack(response.data.stackDetail)
+            })
+            .catch(error => {
+                console.log("err in fetching stackDetail", error)
+                setStack(getStackById(id))
+            })
+            .finally(() => {
+                setLoading(false)
+            })
+    }, [id])
+
+    if (loading) {
+        return (
+            <div className="flex h-[100dvh] w-full items-center justify-center bg-[var(--color-bg)] px-6 md:h-[100vh]">
+                <div className="w-full max-w-md">
+                    <div className="h-2 overflow-hidden rounded-full bg-[var(--color-border)]">
+                        <div className="h-full w-1/2 animate-pulse rounded-full bg-[var(--color-primary)]" />
+                    </div>
+                    <p className="mt-4 text-center text-sm text-[var(--color-text-secondary)]">
+                        Loading stack...
+                    </p>
+                </div>
+            </div>
+        )
+    }
 
     if (!stack) {
         return (
@@ -57,8 +91,8 @@ export default function StackDetail() {
                     <div className="flex justify-center">
                         <BookCover
                             title={stack.title}
-                            author={stack.author}
-                            cover={stack.cover}
+                            author={stack.creator}
+                            cover={stack.coverImage}
                         />
                     </div>
 
@@ -68,7 +102,7 @@ export default function StackDetail() {
                         </h1>
                         <div className="flex items-center justify-center gap-2 text-sm text-[var(--color-text-secondary)]">
                             <PenLine className="h-4 w-4" />
-                            <span>{stack.author}</span>
+                            <span>{stack.creator}</span>
                         </div>
                     </div>
 
@@ -85,55 +119,50 @@ export default function StackDetail() {
                 </header>
 
                 <div className="mt-10 w-full max-w-xl">
-                    <article className="rounded-[28px] border border-[var(--color-border)] bg-[var(--color-card)] p-6 shadow-[var(--shadow-md)] sm:p-8">
-                        <header>
-                            <h2 className="text-2xl font-bold tracking-tight text-[var(--color-text-primary)]">
-                                {stack.insightTitle}
-                            </h2>
-                        </header>
+                    {
+                        (stack.cards ?? []).map(card => (
+                            <article className="rounded-[28px] border border-[var(--color-border)] bg-[var(--color-card)] p-6 shadow-[var(--shadow-md)] sm:p-8">
+                                <header>
+                                    <h2 className="text-2xl font-bold tracking-tight text-[var(--color-text-primary)]">
+                                        {card.head}
+                                    </h2>
+                                </header>
 
-                        <section className="mt-5 space-y-5 font-serif text-[1rem] leading-7 text-[var(--color-text-primary)] sm:text-[1.05rem]">
-                            {stack.insight.map((paragraph, index) => (
-                                <p key={`${stack.id}-paragraph-${index}`}>
-                                    {index === 0 ? (
-                                        <>
-                                            <strong className="font-semibold">
-                                                {paragraph.split('. ')[0]}.
-                                            </strong>{' '}
-                                            {paragraph.slice(paragraph.indexOf('. ') + 2)}
-                                        </>
-                                    ) : (
-                                        paragraph
-                                    )}
-                                </p>
-                            ))}
-                        </section>
+                                <section className="mt-5 space-y-5 font-serif text-[1rem] leading-7 text-[var(--color-text-primary)] sm:text-[1.05rem]">
 
-                        <footer className="mt-8 flex items-center justify-between gap-4 border-t border-[var(--color-divider)] pt-5 text-[var(--color-text-muted)]">
-                            <div className="flex items-center gap-2 text-sm font-semibold">
-                                <Eye className="h-5 w-5" />
-                                <span>{stack.views}</span>
-                            </div>
+                                    <p >
+                                        {card.content}
+                                    </p>
 
-                            <div className="flex items-center gap-4">
-                                <button
-                                    type="button"
-                                    className="transition hover:text-[var(--color-text-primary)]"
-                                    aria-label="Share stack"
-                                >
-                                    <Share2 className="h-5 w-5" />
-                                </button>
-                                <button
-                                    type="button"
-                                    className="flex items-center gap-1.5 transition hover:text-[var(--color-text-primary)]"
-                                    aria-label="Saved count"
-                                >
-                                    <Bookmark className="h-5 w-5" />
-                                    <span className="text-sm font-semibold">{stack.saves}</span>
-                                </button>
-                            </div>
-                        </footer>
-                    </article>
+                                </section>
+
+                                <footer className="mt-8 flex items-center justify-between gap-4 border-t border-[var(--color-divider)] pt-5 text-[var(--color-text-muted)]">
+                                    <div className="flex items-center gap-2 text-sm font-semibold">
+                                        <Eye className="h-5 w-5" />
+                                        <span>{stack.views}</span>
+                                    </div>
+
+                                    <div className="flex items-center gap-4">
+                                        <button
+                                            type="button"
+                                            className="transition hover:text-[var(--color-text-primary)]"
+                                            aria-label="Share stack"
+                                        >
+                                            <Share2 className="h-5 w-5" />
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="flex items-center gap-1.5 transition hover:text-[var(--color-text-primary)]"
+                                            aria-label="Saved count"
+                                        >
+                                            <Bookmark className="h-5 w-5" />
+                                            <span className="text-sm font-semibold">{stack.saves}</span>
+                                        </button>
+                                    </div>
+                                </footer>
+                            </article>
+                        ))
+                    }
                 </div>
             </div>
         </div>

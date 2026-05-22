@@ -6,5 +6,6 @@ const router = express.Router();
 
 router.post("/create", authMiddleware.authCreatorMiddleware, stackController.createStack);
 router.get("/", stackController.getStacks);
+router.get("/:id", stackController.getStackDetail);
 
 module.exports = router;
