@@ -69,16 +69,61 @@ IMAGEKIT_PRIVATE_KEY=your_imagekit_private_key
 IMAGEKIT_URL_ENDPOINT=your_imagekit_url_endpoint
 PORT=3000
 ALLOWED_ORIGINS=http://localhost:5173
+GOOGLE_CLIENT_ID=your_google_oauth_client_id
+GOOGLE_CLIENT_SECRET=your_google_oauth_client_secret
+GOOGLE_REDIRECT_URI=http://localhost:3000/auth/callback
+FRONTEND_URL=http://localhost:5173
 ```
 
 Notes:
 - `ALLOWED_ORIGINS` supports comma-separated origins.
 - Auth cookies are set with `secure: true` and `sameSite: none`, so HTTPS is required in strict browser environments.
+- Google sign-in: `GOOGLE_REDIRECT_URI` must exactly match a URI in [Google Cloud Console](https://console.cloud.google.com/) → APIs & Services → Credentials → your OAuth client → **Authorized redirect URIs**. The backend serves the callback at `/auth/callback` (and `/api/auth/callback`).
 
 ### Frontend env (`frontend/.env`)
 ```env
 VITE_API_URL=http://localhost:3000
 ```
+
+## Deploy Google OAuth (production)
+
+If Google sign-in redirects to `http://localhost:5173/...?oauth_error=Google+OAuth+is+not+configured`, the **hosted backend** is missing OAuth env vars and/or `FRONTEND_URL`.
+
+### 1) Backend host (Render, Railway, etc.)
+
+Set the same variables as local `.env`, but use production URLs:
+
+| Variable | Example (replace with yours) |
+|----------|------------------------------|
+| `GOOGLE_CLIENT_ID` | From Google Cloud OAuth client |
+| `GOOGLE_CLIENT_SECRET` | From Google Cloud OAuth client |
+| `GOOGLE_REDIRECT_URI` | `https://YOUR-BACKEND.onrender.com/auth/callback` |
+| `FRONTEND_URL` | `https://food-reel-plum.vercel.app` |
+| `ALLOWED_ORIGINS` | `https://food-reel-plum.vercel.app` (comma-separate if you have more) |
+
+Redeploy the backend after saving env vars.
+
+### 2) Google Cloud Console
+
+Under your OAuth 2.0 client:
+
+- **Authorized redirect URIs**: add `https://YOUR-BACKEND.onrender.com/auth/callback` (must match `GOOGLE_REDIRECT_URI` exactly).
+- **Authorized JavaScript origins** (optional for this flow): your frontend URL, e.g. `https://food-reel-plum.vercel.app`.
+
+Keep `http://localhost:3000/auth/callback` if you still test locally.
+
+### 3) Frontend host (Vercel, etc.)
+
+| Variable | Value |
+|----------|--------|
+| `VITE_API_URL` | `https://YOUR-BACKEND.onrender.com` (no trailing slash) |
+
+**Redeploy** the frontend after changing `VITE_API_URL` (Vite bakes it in at build time).
+
+### 4) Quick check
+
+- Google button should open: `https://YOUR-BACKEND/.../api/auth/google` (or `/auth/google` depending on mount).
+- On failure, you should land on `https://YOUR-FRONTEND/user/login?oauth_error=...`, not `localhost:5173`.
 
 ## Run Locally
 ### Start backend
