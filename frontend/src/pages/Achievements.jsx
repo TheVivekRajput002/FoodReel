@@ -151,16 +151,23 @@ export default function Achievements() {
     const [loading, setLoading] = useState(true)
     const [loadError, setLoadError] = useState('')
     const [completingId, setCompletingId] = useState('')
+    const [completeError, setCompleteError] = useState('')
 
     async function handleCompleteBadge(badgeId) {
         setCompletingId(badgeId)
+        setCompleteError('')
 
         try {
-            await axios.post(
+            const response = await axios.post(
                 `${import.meta.env.VITE_API_URL}/api/badge/${badgeId}/completeBadge`,
                 {},
                 { withCredentials: true }
             )
+
+            if (!response.data?.success) {
+                setCompleteError(response.data?.message || 'Unable to complete badge.')
+                return
+            }
 
             setBadges((currentBadges) =>
                 currentBadges.map((badge) =>
@@ -168,6 +175,11 @@ export default function Achievements() {
                 )
             )
         } catch (error) {
+            const message =
+                error.response?.data?.message ||
+                error.response?.data?.error?.message ||
+                'Unable to complete badge. Make sure you are logged in as a user account.'
+            setCompleteError(message)
             console.log('error completing badge', error)
         } finally {
             setCompletingId('')
@@ -286,6 +298,15 @@ export default function Achievements() {
                         </div>
                     </div>
                 </header>
+
+                {completeError && (
+                    <p
+                        role="alert"
+                        className="mt-4 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-raised)] px-4 py-3 text-sm text-[var(--color-text-secondary)]"
+                    >
+                        {completeError}
+                    </p>
+                )}
 
                 {completedBadges.length > 0 && (
                     <section className="mt-10">

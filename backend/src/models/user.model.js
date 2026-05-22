@@ -6,8 +6,9 @@ const userSchema = new mongoose.Schema({
         required: true,
         trim: true,
     },
-    profile_picture:{
-        type:String,
+    profile_picture: {
+        type: String,
+        default: "https://i.pinimg.com/736x/f5/47/d8/f547d800625af9056d62efe8969aeea0.jpg"
     },
     bio: {
         type: String,
@@ -34,6 +35,16 @@ const userSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
+    score: {
+        type: Number,
+        default: 0,
+        required: true
+    },
+    streak: {
+        type: Number,
+        default: 0,
+        required: true
+    }
 },
     {
         timestamps: true

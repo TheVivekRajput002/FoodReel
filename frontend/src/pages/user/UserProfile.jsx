@@ -1,36 +1,21 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
-import { Settings } from 'lucide-react'
+import { Award, Crown, Flame, Medal, Settings, Trophy } from 'lucide-react'
+import { normalizeBadge } from '../achievements/badgeData'
+
+const TIER_ICONS = {
+    bronze: Medal,
+    silver: Award,
+    gold: Trophy,
+    platinum: Crown,
+}
 
 const PROFILE_STATS = {
     posts: 14,
     followers: 547,
     following: 404,
 }
-
-const PROFILE_HIGHLIGHTS = [
-    {
-        id: 1,
-        title: 'IIT Kanpur...',
-        image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=240&q=80',
-    },
-    {
-        id: 2,
-        title: 'huhhh?',
-        image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=240&q=80',
-    },
-    {
-        id: 3,
-        title: 'Me*',
-        image: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=240&q=80',
-    },
-    {
-        id: 4,
-        title: 'November...',
-        image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=240&q=80',
-    },
-]
 
 const PROFILE_POSTS = [
     {
@@ -72,6 +57,7 @@ function UserProfile() {
     const [user, setUser] = useState(null)
     const [loading, setLoading] = useState(true)
     const [savedReels, setSavedReels] = useState([])
+    const [badges, setBadges] = useState([])
     const [error, setError] = useState('')
     const navigate = useNavigate()
 
@@ -106,7 +92,20 @@ function UserProfile() {
             })
     }, [navigate])
 
-    console.log(savedReels)
+    useEffect(() => {
+        axios
+            .get(`${import.meta.env.VITE_API_URL}/api/badge`, { withCredentials: true })
+            .then((response) => {
+                const nextBadges = Array.isArray(response.data?.badges)
+                    ? response.data.badges.map(normalizeBadge)
+                    : []
+                setBadges(nextBadges)
+            })
+            .catch((errorLogMsg) => {
+                console.error('Badges could not be loaded', errorLogMsg)
+                setBadges([])
+            })
+    }, [])
 
     const handleLogout = async () => {
         try {
@@ -148,10 +147,13 @@ function UserProfile() {
     const profileName = user.name || 'Vivek Rajput'
     const username = user.username || 'tvr002'
     const followingCount = user.followingCount || '404'
+    const score = user.score || '404'
+    const streak = Number(user.streak) || 0
     const profileImage = user.profile_picture || 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80'
     const bio = 'plus ultra !'
     const insightsLead = '1.9k views in the last 30 days.'
     const insightsCta = 'View Insights'
+    const completedBadges = badges.filter((badge) => badge.completed)
 
     return (
         <div className="min-h-[100dvh] w-full bg-[var(--color-bg)] text-[var(--color-text-primary)]">
@@ -208,7 +210,7 @@ function UserProfile() {
                             <div className="min-w-0">
                                 <div className="flex items-start justify-between gap-3">
                                     <StatItem value={PROFILE_STATS.posts} label="posts" />
-                                    <StatItem value={PROFILE_STATS.followers} label="followers" />
+                                    <StatItem value={score} label="score" />
                                     <StatItem value={followingCount} label="following" />
                                 </div>
                             </div>
@@ -246,7 +248,7 @@ function UserProfile() {
                         <div>
                             <div className="mt-3 flex items-center gap-10">
                                 <p className="text-base"><span className="font-semibold">{PROFILE_STATS.posts}</span> posts</p>
-                                <p className="text-base"><span className="font-semibold">{PROFILE_STATS.followers}</span> followers</p>
+                                <p className="text-base"><span className="font-semibold">{score}</span> score</p>
                                 <p className="text-base"><span className="font-semibold">{user.followingCount}</span> following</p>
                             </div>
                             <div className="mt-5">
@@ -259,16 +261,44 @@ function UserProfile() {
                     </section>
 
                     <section className="mt-6 flex gap-4 overflow-x-auto pb-2 md:mt-11 md:gap-6">
-                        {PROFILE_HIGHLIGHTS.map((item) => (
-                            <div key={item.id} className="w-[72px] shrink-0 text-center md:w-[84px]">
-                                <div className="mx-auto flex h-[72px] w-[72px] items-center justify-center rounded-full border border-[var(--color-border-strong)] p-[3px] md:h-[84px] md:w-[84px]">
-                                    <div className="h-full w-full overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-surface)]">
-                                        <img src={item.image} alt={item.title} className="h-full w-full object-cover" />
-                                    </div>
+                        <div className="w-[72px] shrink-0 text-center md:w-[84px]">
+                            <div className="mx-auto flex h-[72px] w-[72px] items-center justify-center rounded-full border border-[var(--color-border-strong)] p-[3px] md:h-[84px] md:w-[84px]">
+                                <div className="flex h-full w-full flex-col items-center justify-center overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-surface)]">
+                                    <Flame className="h-7 w-7 text-[var(--color-primary)] md:h-8 md:w-8" aria-hidden />
+                                    <span className="mt-0.5 text-[15px] font-semibold leading-4 text-[var(--color-text-primary)] md:text-[17px]">
+                                        {streak}
+                                    </span>
                                 </div>
-                                <p className="mt-1.5 truncate text-[12px] font-medium leading-4 text-[var(--color-text-primary)]">{item.title}</p>
                             </div>
-                        ))}
+                            <p className="mt-1.5 truncate text-[12px] font-medium leading-4 text-[var(--color-text-primary)]">
+                                Consistency
+                            </p>
+                        </div>
+
+                        {completedBadges.map((badge) => {
+                            const TierIcon = TIER_ICONS[badge.tier] || Medal
+
+                            return (
+                                <div key={badge.id} className="w-[72px] shrink-0 text-center md:w-[84px]">
+                                    <div className="mx-auto flex h-[72px] w-[72px] items-center justify-center rounded-full border border-[var(--color-border-strong)] p-[3px] md:h-[84px] md:w-[84px]">
+                                        <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-surface)]">
+                                            {badge.iconUrl ? (
+                                                <img
+                                                    src={badge.iconUrl}
+                                                    alt={badge.name}
+                                                    className="h-full w-full object-cover"
+                                                />
+                                            ) : (
+                                                <TierIcon className="h-8 w-8 text-[var(--color-text-secondary)] md:h-9 md:w-9" aria-hidden />
+                                            )}
+                                        </div>
+                                    </div>
+                                    <p className="mt-1.5 truncate text-[12px] font-medium leading-4 text-[var(--color-text-primary)]">
+                                        {badge.name}
+                                    </p>
+                                </div>
+                            )
+                        })}
                     </section>
                 </div>
 
