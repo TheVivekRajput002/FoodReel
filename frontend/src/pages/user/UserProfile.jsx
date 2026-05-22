@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
-import { Award, Crown, Flame, Medal, Settings, Trophy } from 'lucide-react'
+import { Award, Crown, Flame, Medal, Settings, Trophy, Bookmark, Heart, Play, X } from 'lucide-react'
 import { normalizeBadge } from '../achievements/badgeData'
 
 const TIER_ICONS = {
@@ -12,37 +12,50 @@ const TIER_ICONS = {
 }
 
 const PROFILE_STATS = {
-    posts: 14,
+    aura: 0,
     followers: 547,
     following: 404,
 }
 
-const PROFILE_POSTS = [
-    {
-        id: 1,
-        image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80',
-    },
-    {
-        id: 2,
-        image: 'https://images.unsplash.com/photo-1511920170033-f8396924c348?auto=format&fit=crop&w=800&q=80',
-    },
-    {
-        id: 3,
-        image: 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=800&q=80',
-    },
-    {
-        id: 4,
-        image: 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=800&q=80',
-    },
-    {
-        id: 5,
-        image: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=800&q=80',
-    },
-    {
-        id: 6,
-        image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80',
-    },
+const PROFILE_TABS = {
+    saved: 'saved',
+    liked: 'liked',
+    achievements: 'achievements',
+}
+
+const PROFILE_TAB_ITEMS = [
+    { id: PROFILE_TABS.saved, icon: Bookmark, label: 'Saved reels' },
+    { id: PROFILE_TABS.liked, icon: Heart, label: 'Liked reels' },
+    { id: PROFILE_TABS.achievements, icon: Trophy, label: 'Achievements' },
 ]
+
+function ProfileTabButton({ tab, activeTab, onSelect }) {
+    const Icon = tab.icon
+    const isActive = activeTab === tab.id
+
+    return (
+        <button
+            type="button"
+            onClick={() => onSelect(tab.id)}
+            aria-label={tab.label}
+            aria-selected={isActive}
+            className={`flex h-11 items-center justify-center border-t md:h-12 ${isActive
+                    ? 'border-[var(--color-text-primary)] text-[var(--color-text-primary)]'
+                    : 'border-transparent text-[var(--color-text-muted)]'
+                }`}
+        >
+            <Icon className="h-5 w-5" strokeWidth={isActive ? 2.25 : 1.75} />
+        </button>
+    )
+}
+
+function ProfileEmptyState() {
+    return (
+        <div className="flex min-h-[280px] items-center justify-center px-6 py-16">
+            <p className="text-[15px] font-medium text-[var(--color-text-muted)]">empty</p>
+        </div>
+    )
+}
 
 function StatItem({ value, label }) {
     return (
@@ -57,6 +70,8 @@ function UserProfile() {
     const [user, setUser] = useState(null)
     const [loading, setLoading] = useState(true)
     const [savedReels, setSavedReels] = useState([])
+    const [activeTab, setActiveTab] = useState(PROFILE_TABS.saved)
+    const [selectedReel, setSelectedReel] = useState(null)
     const [badges, setBadges] = useState([])
     const [error, setError] = useState('')
     const navigate = useNavigate()
@@ -150,8 +165,7 @@ function UserProfile() {
     const score = user.score || '404'
     const streak = Number(user.streak) || 0
     const profileImage = user.profile_picture || 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80'
-    const bio = 'plus ultra !'
-    const insightsLead = '1.9k views in the last 30 days.'
+    const bio = user.bio || "new user"
     const insightsCta = 'View Insights'
     const completedBadges = badges.filter((badge) => badge.completed)
 
@@ -199,7 +213,11 @@ function UserProfile() {
                 </header>
 
                 <div className="px-4 pt-4 md:px-0 md:pt-10">
+
+
                     <section className="md:hidden">
+                        {/* ==================== phone view  =================== */}
+                        {/* ==================== profile top section  =================== */}
                         <div className="grid grid-cols-[96px_1fr] items-center gap-x-4">
                             <div className="flex justify-start">
                                 <div className="h-[86px] w-[86px] shrink-0 overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-surface)]">
@@ -209,7 +227,7 @@ function UserProfile() {
 
                             <div className="min-w-0">
                                 <div className="flex items-start justify-between gap-3">
-                                    <StatItem value={PROFILE_STATS.posts} label="posts" />
+                                    <StatItem value={PROFILE_STATS.aura} label="aura" />
                                     <StatItem value={score} label="score" />
                                     <StatItem value={followingCount} label="following" />
                                 </div>
@@ -233,10 +251,11 @@ function UserProfile() {
                             </button>
                         </div>
 
-                        <p className="mt-4 text-[15px] leading-5 text-[var(--color-text-primary)]">
-                            {insightsLead} <span className="font-semibold">{insightsCta}</span>
-                        </p>
+
                     </section>
+
+                    {/*====================== Laptop view ========================== */}
+                    {/* ==================== profile top section  =================== */}
 
                     <section className="hidden md:grid md:grid-cols-[291px_1fr] md:gap-x-24">
                         <div className="flex justify-center">
@@ -247,20 +266,22 @@ function UserProfile() {
 
                         <div>
                             <div className="mt-3 flex items-center gap-10">
-                                <p className="text-base"><span className="font-semibold">{PROFILE_STATS.posts}</span> posts</p>
+                                <p className="text-base"><span className="font-semibold">{PROFILE_STATS.aura}</span> aura</p>
                                 <p className="text-base"><span className="font-semibold">{score}</span> score</p>
                                 <p className="text-base"><span className="font-semibold">{user.followingCount}</span> following</p>
                             </div>
-                            <div className="mt-5">
+                            <div className="mt-7">
                                 <p className="text-sm font-semibold">{profileName}</p>
                                 <p className="mt-1 text-sm text-[var(--color-text-primary)]">{bio}</p>
                                 <p className="mt-1 text-sm text-[var(--color-text-secondary)]">{user.email}</p>
                             </div>
-                            <p className="mt-4 text-sm text-[var(--color-text-secondary)]">{insightsLead} {insightsCta}</p>
+
                         </div>
                     </section>
 
-                    <section className="mt-6 flex gap-4 overflow-x-auto pb-2 md:mt-11 md:gap-6">
+                    {/* ======================= badges story section ==================== */}
+
+                    <section className="mt-6 flex gap-4 overflow-x-auto pb-4 md:mt-11 md:gap-6">
                         <div className="w-[72px] shrink-0 text-center md:w-[84px]">
                             <div className="mx-auto flex h-[72px] w-[72px] items-center justify-center rounded-full border border-[var(--color-border-strong)] p-[3px] md:h-[84px] md:w-[84px]">
                                 <div className="flex h-full w-full flex-col items-center justify-center overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-surface)]">
@@ -302,44 +323,89 @@ function UserProfile() {
                     </section>
                 </div>
 
+                {/* ======================= profile content tabs ======================= */}
                 <section className="mt-5 border-t border-[var(--color-border)]">
-                    <div className="grid grid-cols-4">
-                        <button className="flex h-11 items-center justify-center border-t border-[var(--color-text-primary)] text-[var(--color-text-primary)] md:h-12">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3.75h6.5v6.5h-6.5zm0 10h6.5v6.5h-6.5zm10-10h6.5v6.5h-6.5zm0 10h6.5v6.5h-6.5z" />
-                            </svg>
-                        </button>
-                        <button className="flex h-11 items-center justify-center text-[var(--color-text-muted)] md:h-12">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 3h14a2 2 0 012 2v14l-4-2-4 2-4-2-4 2V5a2 2 0 012-2z" />
-                            </svg>
-                        </button>
-                        <button className="flex h-11 items-center justify-center text-[var(--color-text-muted)] md:h-12">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v6h6M20 20v-6h-6M20 4l-6 6M4 20l6-6" />
-                            </svg>
-                        </button>
-                        <button className="flex h-11 items-center justify-center text-[var(--color-text-muted)] md:h-12">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                            </svg>
-                        </button>
-                    </div>
-                </section>
-
-                <section className="grid grid-cols-3 gap-[1px] bg-[var(--color-border)]">
-                    {savedReels.map((item) => (
-                        <div key={item._id} className="relative aspect-[4/5] overflow-hidden bg-[var(--color-surface)]">
-                            <img
-                                src={item.reel?.thumbnail || profileImage}
-                                alt={`Post ${item.reel?.name || 'saved reel'}`}
-                                className="h-full w-full object-cover"
+                    <div className="grid grid-cols-3">
+                        {PROFILE_TAB_ITEMS.map((tab) => (
+                            <ProfileTabButton
+                                key={tab.id}
+                                tab={tab}
+                                activeTab={activeTab}
+                                onSelect={setActiveTab}
                             />
-                            <div className="absolute right-2 top-2 h-4 w-4 rounded-[4px] border-2 border-white/95" />
+                        ))}
+                    </div>
+
+                    {activeTab === PROFILE_TABS.saved && (
+                        <div className="grid grid-cols-3 gap-[1px] bg-[var(--color-border)]">
+                            {savedReels.map((item) => (
+                                <button
+                                    key={item._id}
+                                    type="button"
+                                    onClick={() => item.reel && setSelectedReel(item.reel)}
+                                    disabled={!item.reel?.video}
+                                    className="group relative aspect-[9/16] overflow-hidden bg-[var(--color-surface)] disabled:cursor-not-allowed"
+                                    aria-label={item.reel?.name ? `Play ${item.reel.name}` : 'Play saved reel'}
+                                >
+                                    <img
+                                        src={item.reel?.thumbnail || profileImage}
+                                        alt={item.reel?.name || 'saved reel'}
+                                        className="h-full w-full object-cover transition duration-200 group-hover:opacity-90 group-disabled:opacity-60"
+                                    />
+                                    <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100 group-disabled:opacity-40">
+                                        <Play className="h-8 w-8 fill-white text-white drop-shadow-md" aria-hidden />
+                                    </div>
+                                </button>
+                            ))}
                         </div>
-                    ))}
+                    )}
+
+                    {activeTab === PROFILE_TABS.liked && <ProfileEmptyState />}
+                    {activeTab === PROFILE_TABS.achievements && <ProfileEmptyState />}
                 </section>
             </div>
+
+            {selectedReel ? (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4 py-6 backdrop-blur-sm"
+                    onClick={() => setSelectedReel(null)}
+                >
+                    <div
+                        className="relative w-full max-w-sm overflow-hidden rounded-[32px] border border-white/10 bg-black shadow-2xl"
+                        onClick={(event) => event.stopPropagation()}
+                    >
+                        <button
+                            type="button"
+                            onClick={() => setSelectedReel(null)}
+                            className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur-sm"
+                            aria-label="Close reel"
+                        >
+                            <X className="h-5 w-5" />
+                        </button>
+
+                        <video
+                            key={selectedReel._id}
+                            src={selectedReel.video}
+                            poster={selectedReel.thumbnail}
+                            className="aspect-[9/16] w-full bg-black object-cover"
+                            controls
+                            autoPlay
+                            playsInline
+                        />
+
+                        <div className="space-y-1 bg-[var(--color-card)] px-5 py-4">
+                            <p className="text-base font-semibold text-[var(--color-text-primary)]">
+                                {selectedReel.name || 'Saved reel'}
+                            </p>
+                            {selectedReel.description ? (
+                                <p className="text-sm text-[var(--color-text-secondary)]">
+                                    {selectedReel.description}
+                                </p>
+                            ) : null}
+                        </div>
+                    </div>
+                </div>
+            ) : null}
         </div>
     )
 }

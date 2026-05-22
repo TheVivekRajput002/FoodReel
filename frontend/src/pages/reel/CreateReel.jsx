@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { useEffect, useRef, useState } from 'react'
-import { ChevronDown, Link2, PackagePlus, Search, Upload } from 'lucide-react'
+import {  Search, Upload } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 function FieldShell({ label, children, className = '' }) {
@@ -93,7 +93,7 @@ export default function CreateReelPage() {
                 if (fileInputRef.current) {
                     fileInputRef.current.value = ''
                 }
-                navigate('/')
+                navigate('/creator/reels')
             } else {
                 setMessage(response.data?.message || 'Failed to create reel')
             }

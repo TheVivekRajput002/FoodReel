@@ -25,7 +25,24 @@ async function updateUserProfile(req, res) {
     })
 }
 
+async function updateUserBio(req, res) {
+    const user = req.user
+    const {bio } = req.body
+
+    await userModel.findByIdAndUpdate(
+        user._id,
+        { bio: bio },
+        { new: true }
+    )
+
+    res.status(201).json({
+        success:true,
+        message: "bio updated succesfully",
+    })
+}
+
 module.exports = {
     getUserProfile,
-    updateUserProfile
+    updateUserProfile,
+    updateUserBio
 }

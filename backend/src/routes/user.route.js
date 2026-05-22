@@ -11,5 +11,6 @@ const upload = multer({
 const router = express.Router();
 
 router.post('/profile-picture', authMiddleware.authUserMiddleware, upload.single("image"), userController.updateUserProfile)
+router.post('/bio', authMiddleware.authUserMiddleware, userController.updateUserBio)
 
 module.exports = router;

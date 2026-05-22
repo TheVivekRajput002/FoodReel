@@ -91,7 +91,7 @@ function CreatorRegister() {
             localStorage.setItem('scs_auth', 'true')
             localStorage.setItem('scs_role', 'creator')
             showToast('Creator account created successfully.', 'success')
-            navigate('/create-reel')
+            navigate('/creator/profile')
         } catch (error) {
             const message = error.response?.data?.message || 'Unable to create account. Please try again.'
             showToast(message, 'error')

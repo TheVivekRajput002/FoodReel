@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { BookOpenText, House, MessageCircle, Plus, Search, Trophy, User, Video } from 'lucide-react'
+import { BookOpenText, House, /* MessageCircle, Search, */ Plus, Trophy, User, Video } from 'lucide-react'
 
 function BottomNav({ canCreate, onCreateClick }) {
     const location = useLocation()
@@ -23,19 +23,19 @@ function BottomNav({ canCreate, onCreateClick }) {
                     icon: () => <Plus className="h-6 w-6" />,
                 }]
                 : []),
-            {
-                name: 'messages',
-                path: '/messages',
-                icon: () => (
-                    <div className="relative">
-                        <MessageCircle className="h-6 w-6" />
-                        <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--color-error)] opacity-75" />
-                            <span className="relative inline-flex h-3 w-3 rounded-full border-2 border-[var(--color-bg)] bg-[var(--color-error)]" />
-                        </span>
-                    </div>
-                ),
-            },
+            // {
+            //     name: 'messages',
+            //     path: '/messages',
+            //     icon: () => (
+            //         <div className="relative">
+            //             <MessageCircle className="h-6 w-6" />
+            //             <span className="absolute -top-1 -right-1 flex h-3 w-3">
+            //                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--color-error)] opacity-75" />
+            //                 <span className="relative inline-flex h-3 w-3 rounded-full border-2 border-[var(--color-bg)] bg-[var(--color-error)]" />
+            //             </span>
+            //         </div>
+            //     ),
+            // },
             {
                 name: 'profile',
                 path: profilePath,
@@ -48,11 +48,11 @@ function BottomNav({ canCreate, onCreateClick }) {
                 path: '/',
                 icon: () => <House className="h-6 w-6" />,
             },
-            {
-                name: 'search',
-                path: '/search',
-                icon: () => <Search className="h-6 w-6" />,
-            },
+            // {
+            //     name: 'search',
+            //     path: '/search',
+            //     icon: () => <Search className="h-6 w-6" />,
+            // },
             {
                 name: 'stack',
                 path: '/stack',
@@ -63,19 +63,19 @@ function BottomNav({ canCreate, onCreateClick }) {
                 path: '/achievements',
                 icon: () => <Trophy className="h-6 w-6" />,
             },
-            {
-                name: 'messages',
-                path: '/messages',
-                icon: () => (
-                    <div className="relative">
-                        <MessageCircle className="h-6 w-6" />
-                        <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--color-error)] opacity-75" />
-                            <span className="relative inline-flex h-3 w-3 rounded-full border-2 border-[var(--color-bg)] bg-[var(--color-error)]" />
-                        </span>
-                    </div>
-                ),
-            },
+            // {
+            //     name: 'messages',
+            //     path: '/messages',
+            //     icon: () => (
+            //         <div className="relative">
+            //             <MessageCircle className="h-6 w-6" />
+            //             <span className="absolute -top-1 -right-1 flex h-3 w-3">
+            //                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--color-error)] opacity-75" />
+            //                 <span className="relative inline-flex h-3 w-3 rounded-full border-2 border-[var(--color-bg)] bg-[var(--color-error)]" />
+            //             </span>
+            //         </div>
+            //     ),
+            // },
             {
                 name: 'profile',
                 path: profilePath,

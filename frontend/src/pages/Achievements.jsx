@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { useEffect, useState } from 'react'
 import { Award, CheckCircle2, Crown, Lock, Medal, Sparkles, Trophy } from 'lucide-react'
+import { useToast } from '../context/ToastContext'
 import {
     BADGE_TIERS,
     TIER_LABELS,
@@ -147,6 +148,7 @@ function TierSection({ tier, badges, onCompleteBadge, completingId }) {
 }
 
 export default function Achievements() {
+    const { showToast } = useToast()
     const [badges, setBadges] = useState([])
     const [loading, setLoading] = useState(true)
     const [loadError, setLoadError] = useState('')
@@ -154,6 +156,8 @@ export default function Achievements() {
     const [completeError, setCompleteError] = useState('')
 
     async function handleCompleteBadge(badgeId) {
+        const completedBadge = badges.find((badge) => badge.id === badgeId)
+
         setCompletingId(badgeId)
         setCompleteError('')
 
@@ -174,6 +178,13 @@ export default function Achievements() {
                     badge.id === badgeId ? { ...badge, completed: true } : badge
                 )
             )
+
+            if (completedBadge && response.data?.message !== 'Badge already completed') {
+                showToast(
+                    `Achievement unlocked: ${completedBadge.name}! +${completedBadge.pointsBonus} bonus points`,
+                    'success'
+                )
+            }
         } catch (error) {
             const message =
                 error.response?.data?.message ||
