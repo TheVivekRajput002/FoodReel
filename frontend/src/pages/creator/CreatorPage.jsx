@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ChevronLeft, Grid3X3, Play, X } from 'lucide-react'
+import { BookOpenText, ChevronLeft, Grid3X3, Play, X } from 'lucide-react'
 import { useToast } from '../../context/ToastContext'
 import { showUnlockedBadges } from '../../utils/badgeToasts'
 import { toggleFollowCreator } from '../../utils/creatorFollow'
@@ -20,6 +20,16 @@ function formatCount(value) {
     return `${count}`
 }
 
+const CREATOR_TABS = {
+    reels: 'reels',
+    stacks: 'stacks',
+}
+
+const CREATOR_TAB_ITEMS = [
+    { id: CREATOR_TABS.reels, icon: Grid3X3, label: 'Reels' },
+    { id: CREATOR_TABS.stacks, icon: BookOpenText, label: 'Stacks' },
+]
+
 function StatItem({ value, label }) {
     return (
         <div className="min-w-[72px] text-center">
@@ -29,12 +39,34 @@ function StatItem({ value, label }) {
     )
 }
 
+function CreatorTabButton({ tab, activeTab, onSelect }) {
+    const Icon = tab.icon
+    const isActive = activeTab === tab.id
+
+    return (
+        <button
+            type="button"
+            onClick={() => onSelect(tab.id)}
+            aria-label={tab.label}
+            aria-selected={isActive}
+            className={`flex h-11 flex-1 items-center justify-center border-t md:h-12 ${isActive
+                ? 'border-[var(--color-text-primary)] text-[var(--color-text-primary)]'
+                : 'border-transparent text-[var(--color-text-muted)]'
+                }`}
+        >
+            <Icon className="h-5 w-5" strokeWidth={isActive ? 2.25 : 1.75} />
+        </button>
+    )
+}
+
 export default function CreatorPage() {
     const { id } = useParams()
     const navigate = useNavigate()
     const { showToast } = useToast()
     const [creator, setCreator] = useState(null)
     const [reels, setReels] = useState([])
+    const [stacks, setStacks] = useState([])
+    const [activeTab, setActiveTab] = useState(CREATOR_TABS.reels)
     const [isFollowed, setIsFollowed] = useState(false)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
@@ -61,6 +93,7 @@ export default function CreatorPage() {
 
                 setCreator(profile)
                 setReels(Array.isArray(response.data?.reels) ? response.data.reels : [])
+                setStacks(Array.isArray(response.data?.stacks) ? response.data.stacks : [])
                 setIsFollowed(!!response.data?.isFollowed)
                 setError('')
             })
@@ -160,6 +193,7 @@ export default function CreatorPage() {
         'https://i.pinimg.com/736x/f5/47/d8/f547d800625af9056d62efe8969aeea0.jpg'
     const followersCount = Number(creator.followersCount) || 0
     const postCount = reels.length
+    const stackCount = stacks.length
 
     return (
         <div className="min-h-[100dvh] w-full bg-[var(--color-bg)] text-[var(--color-text-primary)]">
@@ -191,9 +225,10 @@ export default function CreatorPage() {
                                 </div>
                             </div>
 
-                            <div className="flex items-start justify-between gap-3">
+                            <div className="flex items-start justify-between gap-2">
                                 <StatItem value={postCount} label="posts" />
                                 <StatItem value={formatCount(followersCount)} label="followers" />
+                                <StatItem value={stackCount} label="stacks" />
                             </div>
                         </div>
 
@@ -255,6 +290,9 @@ export default function CreatorPage() {
                                 <p className="text-base">
                                     <span className="font-semibold">{formatCount(followersCount)}</span> followers
                                 </p>
+                                <p className="text-base">
+                                    <span className="font-semibold">{stackCount}</span> stacks
+                                </p>
                             </div>
 
                             <div className="mt-7">
@@ -268,42 +306,81 @@ export default function CreatorPage() {
                 </div>
 
                 <section className="mt-5 border-t border-[var(--color-border)]">
-                    <div className="flex justify-center border-b border-[var(--color-border)]">
-                        <div className="flex h-11 items-center justify-center border-t border-[var(--color-text-primary)] px-6 md:h-12">
-                            <Grid3X3 className="h-5 w-5" strokeWidth={2.25} />
-                        </div>
+                    <div className="grid grid-cols-2 border-b border-[var(--color-border)]">
+                        {CREATOR_TAB_ITEMS.map((tab) => (
+                            <CreatorTabButton
+                                key={tab.id}
+                                tab={tab}
+                                activeTab={activeTab}
+                                onSelect={setActiveTab}
+                            />
+                        ))}
                     </div>
 
-                    {reels.length > 0 ? (
-                        <div className="grid grid-cols-3 gap-[1px] bg-[var(--color-bg)]">
-                            {reels.map((reel) => (
-                                <button
-                                    key={reel._id}
-                                    type="button"
-                                    onClick={() => setSelectedReel(reel)}
-                                    disabled={!reel.video}
-                                    className="group relative aspect-[9/16] overflow-hidden bg-[var(--color-surface)] disabled:cursor-not-allowed"
-                                    aria-label={reel.name ? `Play ${reel.name}` : 'Play reel'}
-                                >
-                                    <img
-                                        src={reel.thumbnail || profileImage}
-                                        alt={reel.name || 'Creator reel'}
-                                        className="h-full w-full object-cover transition duration-200 group-hover:opacity-90 group-disabled:opacity-60"
-                                    />
-                                    <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100 group-disabled:opacity-40">
-                                        <Play className="h-8 w-8 fill-white text-white drop-shadow-md" aria-hidden />
-                                    </div>
-                                    <div className="pointer-events-none absolute bottom-2 left-2 flex items-center gap-1 text-xs font-semibold text-white drop-shadow-md">
-                                        <Play className="h-3 w-3 fill-white" aria-hidden />
-                                        {formatCount(reel.likeCount)}
-                                    </div>
-                                </button>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="flex min-h-[280px] items-center justify-center px-6 py-16">
-                            <p className="text-[15px] font-medium text-[var(--color-text-muted)]">No posts yet</p>
-                        </div>
+                    {activeTab === CREATOR_TABS.reels && (
+                        reels.length > 0 ? (
+                            <div className="grid grid-cols-3 gap-[1px] bg-[var(--color-bg)]">
+                                {reels.map((reel) => (
+                                    <button
+                                        key={reel._id}
+                                        type="button"
+                                        onClick={() => setSelectedReel(reel)}
+                                        disabled={!reel.video}
+                                        className="group relative aspect-[9/16] overflow-hidden bg-[var(--color-surface)] disabled:cursor-not-allowed"
+                                        aria-label={reel.name ? `Play ${reel.name}` : 'Play reel'}
+                                    >
+                                        <img
+                                            src={reel.thumbnail || profileImage}
+                                            alt={reel.name || 'Creator reel'}
+                                            className="h-full w-full object-cover transition duration-200 group-hover:opacity-90 group-disabled:opacity-60"
+                                        />
+                                        <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100 group-disabled:opacity-40">
+                                            <Play className="h-8 w-8 fill-white text-white drop-shadow-md" aria-hidden />
+                                        </div>
+                                        <div className="pointer-events-none absolute bottom-2 left-2 flex items-center gap-1 text-xs font-semibold text-white drop-shadow-md">
+                                            <Play className="h-3 w-3 fill-white" aria-hidden />
+                                            {formatCount(reel.likeCount)}
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="flex min-h-[280px] items-center justify-center px-6 py-16">
+                                <p className="text-[15px] font-medium text-[var(--color-text-muted)]">No posts yet</p>
+                            </div>
+                        )
+                    )}
+
+                    {activeTab === CREATOR_TABS.stacks && (
+                        stacks.length > 0 ? (
+                            <div className="grid grid-cols-2 justify-items-center gap-5 px-4 py-6 sm:grid-cols-3 sm:gap-6 md:px-0">
+                                {stacks.map((stack) => (
+                                    <button
+                                        key={stack._id}
+                                        type="button"
+                                        onClick={() => navigate(`/stack/${stack._id}`)}
+                                        className="group flex w-full max-w-[13.5rem] flex-col items-center gap-2 text-left transition hover:-translate-y-0.5"
+                                        aria-label={stack.title ? `Open ${stack.title}` : 'Open stack'}
+                                    >
+                                        <div className="relative aspect-[13.5/19] w-full overflow-hidden rounded-[1.35rem] border border-[var(--color-border)] bg-[var(--color-card)] shadow-[var(--shadow-lg)] transition group-hover:shadow-[var(--shadow-card)]">
+                                            <div className="absolute inset-y-0 left-0 z-10 w-3 bg-[var(--color-text-primary)]/75" />
+                                            <img
+                                                src={stack.coverImage || profileImage}
+                                                alt={stack.title ? `${stack.title} cover` : 'Creator stack cover'}
+                                                className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
+                                            />
+                                        </div>
+                                        <p className="line-clamp-2 w-full px-0.5 text-center text-xs font-semibold leading-snug text-[var(--color-text-primary)]">
+                                            {stack.title || 'Stack'}
+                                        </p>
+                                    </button>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="flex min-h-[280px] items-center justify-center px-6 py-16">
+                                <p className="text-[15px] font-medium text-[var(--color-text-muted)]">No stacks yet</p>
+                            </div>
+                        )
                     )}
                 </section>
             </div>

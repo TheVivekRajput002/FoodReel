@@ -1,6 +1,7 @@
 const creatorModel = require('../models/creator.model')
 const userModel = require('../models/user.model')
 const reelModel = require("../models/reel.model")
+const stackModel = require("../models/stack.model")
 const followModel = require("../models/follow.model")
 const { uploadFile } = require("../services/storage.service")
 const { checkAchievements } = require("../services/achievement.service")
@@ -11,7 +12,10 @@ async function getCreatorById(req, res) {
     const creatorId = req.params.id
 
     const creator = await creatorModel.findById(creatorId).select("-password")
-    const reels = await reelModel.find({ creator: creatorId }).sort({ createdAt: -1 })
+    const [reels, stacks] = await Promise.all([
+        reelModel.find({ creator: creatorId }).sort({ createdAt: -1 }),
+        stackModel.find({ creator: creatorId }).sort({ createdAt: -1 }),
+    ])
 
     if (!creator) {
         return res.status(404).json({ message: "food partner not found" })
@@ -41,6 +45,7 @@ async function getCreatorById(req, res) {
         message: "food partner details received successfully",
         creator,
         reels,
+        stacks,
         isFollowed,
     })
 }
