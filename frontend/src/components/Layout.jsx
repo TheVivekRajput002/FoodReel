@@ -14,6 +14,7 @@ export default function Layout() {
         return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     });
     const isCreator = localStorage.getItem('scs_role') === 'creator';
+    const isImmersiveFeed = location.pathname === '/' || location.pathname === '/stack';
 
     React.useEffect(() => {
         document.documentElement.style.colorScheme = themeMode;
@@ -48,7 +49,7 @@ export default function Layout() {
             {/* The main content area grows to fill available space.
                 On mobile, padding-bottom ensures content isn't hidden behind the fixed BottomNav.
                 On MD breakpoint and up, padding is removed since BottomNav can be handled differently or hidden. */}
-            <main className="min-h-screen overflow-y-auto pb-[60px] md:pb-0 md:pl-[86px]">
+            <main className={`min-h-screen overflow-y-auto md:pb-0 md:pl-[86px] ${isImmersiveFeed ? 'pb-0' : 'pb-[60px]'}`}>
                 <Outlet />
             </main>
             

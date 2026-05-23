@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom'
 
 function FieldShell({ label, children, className = '' }) {
     return (
-        <label className={`block rounded-[20px] border border-[var(--color-border)] bg-[var(--color-lightgray)] px-4 py-3 ${className}`}>
+        <label className={`block rounded-[16px] border border-[var(--color-border)] bg-[var(--color-lightgray)] px-3 py-2.5 sm:rounded-[20px] sm:px-4 sm:py-3 ${className}`}>
             <span className="block text-[12px] font-semibold text-[var(--color-text-secondary)]">{label}</span>
             {children}
         </label>
@@ -106,25 +106,27 @@ export default function CreateReelPage() {
     }
 
     return (
-        <div className="min-h-[100dvh] bg-[var(--color-bg)] px-4 py-4 text-[var(--color-text-primary)] md:px-6 md:py-5">
+        <div className="min-h-[100dvh] bg-[var(--color-bg)] px-3 py-3 pb-6 text-[var(--color-text-primary)] sm:px-4 sm:py-4 md:px-6 md:py-5">
             <div className="mx-auto max-w-[1280px]">
-            
-                    <div className="space-y-1 mb-4 ml-3 mt-2">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-primary)]">
-                            Creator Studio
-                        </p>
-                        <h1 className="text-[26px] font-semibold tracking-[-0.02em] md:text-[32px]">Create Reel</h1>
-                    </div>
-                   
-               
- 
-                <form onSubmit={handleSubmit} className="grid xl:grid-cols-[310px_minmax(0,1fr)] rounded-[28px] border border-[var(--color-border)] bg-[var(--color-card)] p-6 shadow-[var(--shadow-card)]">
-                    
+                <div className="mb-4 space-y-1 sm:mb-5">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-primary)]">
+                        Creator Studio
+                    </p>
+                    <h1 className="text-[22px] font-semibold tracking-[-0.02em] sm:text-[26px] md:text-[32px]">
+                        Create Reel
+                    </h1>
+                </div>
+
+                <form
+                    onSubmit={handleSubmit}
+                    className="grid gap-5 rounded-[20px] border border-[var(--color-border)] bg-[var(--color-card)] p-4 shadow-[var(--shadow-card)] sm:rounded-[28px] sm:p-6 xl:grid-cols-[310px_minmax(0,1fr)] xl:gap-6"
+                >
+                    <div className="flex justify-center xl:justify-start">
                         <div
                             onDrop={handleDrop}
                             onDragOver={handleDragOver}
                             onClick={() => fileInputRef.current?.click()}
-                            className="flex w-full max-w-[290px] aspect-[9/16] cursor-pointer flex-col items-center justify-between rounded-[24px] border border-[var(--color-border)] bg-[var(--color-lightgray)]  text-center transition hover:border-[var(--color-border-strong)] hover:bg-[var(--color-hover)]"
+                            className="flex aspect-[9/16] w-full max-w-[min(100%,280px)] cursor-pointer flex-col items-center justify-between rounded-[20px] border border-[var(--color-border)] bg-[var(--color-lightgray)] text-center transition hover:border-[var(--color-border-strong)] hover:bg-[var(--color-hover)] sm:max-w-[290px] sm:rounded-[24px] xl:max-w-[290px]"
                         >
                             {previewUrl ? (
                                 <div className="relative h-full w-full overflow-hidden rounded-[24px]">
@@ -153,10 +155,10 @@ export default function CreateReelPage() {
                                         <div className="mb-5 grid h-12 w-12 place-items-center rounded-full border-2 border-[var(--color-text-primary)] text-[var(--color-text-primary)]">
                                             <Upload className="h-6 w-6" />
                                         </div>
-                                        <p className="max-w-[230px] text-[18px] font-semibold leading-8 text-[var(--color-text-primary)]">
+                                        <p className="max-w-[200px] px-3 text-[15px] font-semibold leading-6 text-[var(--color-text-primary)] sm:max-w-[230px] sm:text-[18px] sm:leading-8">
                                             {fileName ? fileName : 'Choose a file or drag and drop it here'}
                                         </p>
-                                        <p className="mt-2 text-[13px] text-[var(--color-text-secondary)]">
+                                        <p className="mt-2 px-3 text-[12px] text-[var(--color-text-secondary)] sm:text-[13px]">
                                             {fileTypeHint || 'Your reel file will be uploaded securely.'}
                                         </p>
                                     </div>
@@ -165,19 +167,18 @@ export default function CreateReelPage() {
                                 </>
                             )}
                         </div>
+                    </div>
 
-                        <input
-                            ref={fileInputRef}
-                            type="file"
-                            accept="video/*"
-                            onChange={handleFileChange}
-                            className="hidden"
-                            required
-                        />
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="video/*"
+                        onChange={handleFileChange}
+                        className="hidden"
+                        required
+                    />
 
-                    
-
-                    <section className="space-y-3">
+                    <section className="min-w-0 space-y-3">
                         <FieldShell label="Title">
                             <input
                                 type="text"
@@ -195,7 +196,7 @@ export default function CreateReelPage() {
                                 value={description}
                                 onChange={(event) => setDescription(event.target.value)}
                                 rows="4"
-                                className="mt-2 w-full resize-none bg-transparent text-[17px] leading-8 text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)]"
+                                className="mt-2 w-full resize-none bg-transparent text-[14px] leading-6 text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)] md:text-[17px] md:leading-8"
                                 required
                             />
                         </FieldShell>
@@ -208,16 +209,16 @@ export default function CreateReelPage() {
                                     placeholder="Search for a tag"
                                     value={tagSearch}
                                     onChange={(event) => setTagSearch(event.target.value)}
-                                    className="w-full bg-transparent text-[17px] text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)]"
+                                    className="w-full bg-transparent text-[14px] text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)] md:text-[17px]"
                                 />
                             </div>
                         </FieldShell>
 
                         
 
-                        <div className="rounded-[24px] border border-[var(--color-border)] bg-[var(--color-card)] p-4 shadow-[var(--shadow-xs)]">
+                        <div className="rounded-[20px] border border-[var(--color-border)] bg-[var(--color-lightgray)] p-4 sm:rounded-[24px] sm:bg-[var(--color-card)] sm:shadow-[var(--shadow-xs)]">
                             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                                <div>
+                                <div className="min-w-0">
                                     <p className="text-[15px] font-semibold text-[var(--color-text-primary)]">Ready to publish?</p>
                                     <p className="mt-1 text-[13px] text-[var(--color-text-secondary)]">
                                         Double-check your title, description, and selected video before uploading.
@@ -226,7 +227,7 @@ export default function CreateReelPage() {
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className="rounded-[18px] bg-[var(--color-primary)] px-6 py-3 text-[15px] font-semibold text-[var(--color-text-on-primary)] transition hover:bg-[var(--color-primary-hover)] disabled:cursor-not-allowed disabled:opacity-70"
+                                    className="w-full shrink-0 rounded-[18px] bg-[var(--color-primary)] px-6 py-3 text-[15px] font-semibold text-[var(--color-text-on-primary)] transition hover:bg-[var(--color-primary-hover)] disabled:cursor-not-allowed disabled:opacity-70 md:w-auto"
                                 >
                                     {loading ? 'Uploading...' : 'Create Reel'}
                                 </button>

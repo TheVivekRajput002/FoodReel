@@ -124,13 +124,12 @@ async function saveReel(req, res) {
             $inc: { bookmarkCount: 1 }
         })
 
-        checkAchievements(user._id, "REEL_SAVED").catch((error) => {
-            console.error("[achievements] REEL_SAVED check failed:", error.message)
-        })
+        const unlocked = await checkAchievements(user._id, "REEL_SAVED")
 
         res.status(201).json({
             message: "reel saved successfully",
-            save
+            save,
+            unlockedBadges: unlocked.map((entry) => entry.badge),
         })
     } catch (error) {
         console.log("there is some error in saving unsaving reel", error)

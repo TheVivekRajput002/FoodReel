@@ -9,6 +9,7 @@ import EditUserProfile from '../pages/user/EditUserProfile';
 import CreatorRegister from '../pages/creator/CreatorRegister';
 import CreatorLogin from '../pages/creator/CreatorLogin';
 import CreatorProfile from '../pages/creator/CreatorProfile';
+import EditCreatorProfile from '../pages/creator/EditCreatorProfile';
 import CreatorReels from '../pages/creator/CreatorReels';
 import CreateReel from '../pages/reel/CreateReel';
 import Inbox from '../pages/Messaging/Inbox';
@@ -44,6 +45,7 @@ function AppRoutes() {
             <Route path='/user/profile' element={<UserProfile />} />
             <Route path='/user/profile/edit' element={<EditUserProfile />} />
             <Route path='/creator/profile' element={<CreatorProfile />} />
+            <Route path='/creator/profile/edit' element={<EditCreatorProfile />} />
             <Route path='/creator/reels' element={<CreatorReels />} />
             <Route path='/create-reel' element={<CreateReel />} />
             <Route path='/achievements' element={<Achievements />} />

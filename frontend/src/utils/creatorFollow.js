@@ -20,5 +20,8 @@ export async function toggleFollowCreator(creatorId) {
         { withCredentials: true }
     )
 
-    return response.data.action === "followed"
+    return {
+        isFollowed: response.data.action === "followed",
+        unlockedBadges: response.data.unlockedBadges ?? [],
+    }
 }

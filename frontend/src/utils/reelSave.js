@@ -36,7 +36,10 @@ export async function toggleSavedReel(reelId) {
         { withCredentials: true }
     )
 
-    return !!response.data.save
+    return {
+        isSaved: Boolean(response.data.save),
+        unlockedBadges: response.data.unlockedBadges ?? [],
+    }
 }
 
 export function updateSavedVideoState(videos, reelId, isSaved) {

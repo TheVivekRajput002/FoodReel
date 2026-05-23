@@ -3,6 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { getStackById } from './stackData'
 import axios from "axios"
 import { useEffect, useState } from 'react'
+import { useToast } from '../../context/ToastContext'
+import { showUnlockedBadges } from '../../utils/badgeToasts'
 
 function BookCover({ title, author, cover }) {
     return (
@@ -26,6 +28,7 @@ function BookCover({ title, author, cover }) {
 export default function StackDetail() {
     const navigate = useNavigate()
     const { id } = useParams()
+    const { showToast } = useToast()
     const [stack, setStack] = useState(null)
     const [loading, setLoading] = useState(true)
 
@@ -42,9 +45,13 @@ export default function StackDetail() {
                     `${import.meta.env.VITE_API_URL}/api/stack/${id}/read`,
                     {},
                     { withCredentials: true }
-                ).catch((readError) => {
-                    console.log("stack read tracking skipped", readError)
-                })
+                )
+                    .then((readResponse) => {
+                        showUnlockedBadges(readResponse.data?.unlockedBadges, showToast)
+                    })
+                    .catch((readError) => {
+                        console.log("stack read tracking skipped", readError)
+                    })
             })
             .catch(error => {
                 console.log("err in fetching stackDetail", error)
@@ -53,7 +60,7 @@ export default function StackDetail() {
             .finally(() => {
                 setLoading(false)
             })
-    }, [id])
+    }, [id, showToast])
 
     if (loading) {
         return (

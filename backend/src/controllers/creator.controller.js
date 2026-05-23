@@ -56,11 +56,13 @@ async function followCreator(req, res) {
         await userModel.findByIdAndUpdate(userId, { $inc: { followingCount: +1 } })
         await creatorModel.findByIdAndUpdate(creatorId, { $inc: { followersCount: +1 } })
 
-        checkAchievements(userId, "USER_FOLLOWED").catch((error) => {
-            console.error("[achievements] USER_FOLLOWED check failed:", error.message)
-        })
+        const unlocked = await checkAchievements(userId, "USER_FOLLOWED")
 
-        return res.json({ success: true, action: "followed" });
+        return res.json({
+            success: true,
+            action: "followed",
+            unlockedBadges: unlocked.map((entry) => entry.badge),
+        });
     }
 }
 

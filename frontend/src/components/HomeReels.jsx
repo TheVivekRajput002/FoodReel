@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react'
 import axios from 'axios'
 import { Play } from 'lucide-react'
+import { useToast } from '../context/ToastContext'
+import { showUnlockedBadges } from '../utils/badgeToasts'
 import {
     buildInitialFollowState,
     toggleFollowCreator,
@@ -33,6 +35,7 @@ function formatCount(value) {
 }
 
 function HomeReels() {
+    const { showToast } = useToast()
     const [videos, setVideos] = useState([])
     const [liked, setLiked] = useState({})
     const [saved, setSaved] = useState({})
@@ -117,10 +120,14 @@ function HomeReels() {
             `${import.meta.env.VITE_API_URL}/api/reel/${activeReelId}/watch`,
             {},
             { withCredentials: true }
-        ).catch((error) => {
-            console.log("reel watch tracking skipped", error)
-        })
-    }, [activeReelId])
+        )
+            .then((response) => {
+                showUnlockedBadges(response.data?.unlockedBadges, showToast)
+            })
+            .catch((error) => {
+                console.log("reel watch tracking skipped", error)
+            })
+    }, [activeReelId, showToast])
 
     useEffect(() => {
         videos.forEach((reel) => {
@@ -168,12 +175,13 @@ function HomeReels() {
         if (!creatorId) return
 
         try {
-            const isFollowed = await toggleFollowCreator(creatorId)
+            const { isFollowed, unlockedBadges } = await toggleFollowCreator(creatorId)
 
             setIsFollowing((prev) => ({
                 ...prev,
                 [creatorId]: isFollowed
             }))
+            showUnlockedBadges(unlockedBadges, showToast)
         } catch (error) {
             console.error("Follow request failed:", error)
         }
@@ -196,9 +204,10 @@ function HomeReels() {
 
     const handleSaveClick = async (reel) => {
         try {
-            const isSaved = await toggleSavedReel(reel._id)
+            const { isSaved, unlockedBadges } = await toggleSavedReel(reel._id)
 
             setVideos((prev) => updateSavedVideoState(prev, reel._id, isSaved))
+            showUnlockedBadges(unlockedBadges, showToast)
             setSaved((prev) => {
                 const next = { ...prev, [reel._id]: isSaved }
                 writeSavedReels(next)
@@ -250,7 +259,7 @@ function HomeReels() {
 
     if (loading) {
         return (
-            <div className="flex h-[calc(100dvh-60px)] w-full items-center justify-center bg-[var(--color-bg)] px-6 text-center text-[var(--color-text-secondary)] md:h-full">
+            <div className="flex h-full w-full items-center justify-center bg-[var(--color-bg)] px-6 text-center text-[var(--color-text-secondary)] md:h-full">
                 Loading reels...
             </div>
         )
@@ -258,7 +267,7 @@ function HomeReels() {
 
     if (loadError) {
         return (
-            <div className="flex h-[calc(100dvh-60px)] w-full items-center justify-center bg-[var(--color-bg)] px-6 text-center md:h-full">
+            <div className="flex h-full w-full items-center justify-center bg-[var(--color-bg)] px-6 text-center md:h-full">
                 <div className="max-w-md rounded-3xl border border-[var(--color-border)] bg-[var(--color-card)] p-6 text-[var(--color-text-primary)] shadow-[var(--shadow-card)]">
                     <p className="text-lg font-semibold">Feed unavailable</p>
                     <p className="mt-2 text-sm text-[var(--color-text-secondary)]">{loadError}</p>
@@ -269,7 +278,7 @@ function HomeReels() {
 
     if (!videos.length) {
         return (
-            <div className="flex h-[calc(100dvh-60px)] w-full items-center justify-center bg-[var(--color-bg)] px-6 text-center md:h-full">
+            <div className="flex h-full w-full items-center justify-center bg-[var(--color-bg)] px-6 text-center md:h-full">
                 <div className="max-w-md rounded-3xl border border-[var(--color-border)] bg-[var(--color-card)] p-6 text-[var(--color-text-primary)] shadow-[var(--shadow-card)]">
                     <p className="text-lg font-semibold">No reels yet</p>
                     <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
@@ -281,7 +290,7 @@ function HomeReels() {
     }
 
     return (
-        <div className="h-[calc(100dvh-60px)] w-full snap-y snap-mandatory overflow-x-hidden overflow-y-scroll bg-black md:h-full md:bg-[var(--color-bg)]">
+        <div className="h-full w-full snap-y snap-mandatory overflow-x-hidden overflow-y-scroll bg-black md:h-full md:bg-[var(--color-bg)]">
             {videos.map((reel) => {
                 const creatorId = reel?.creator?._id || reel?.creator || reel?.creatorId
                 const followed = !!isFollowing[creatorId]
@@ -306,9 +315,9 @@ function HomeReels() {
                             delete reelRefs.current[reel._id]
                         }}
                         data-reel-id={reel._id}
-                        className="relative flex h-[calc(100dvh-60px)] w-full snap-center snap-always items-center justify-center px-0 pt-0 md:h-full md:px-6 md:pt-7"
+                        className="relative flex h-full w-full snap-center snap-always items-center justify-center px-0 pt-0 md:h-full md:px-6 md:pt-7"
                     >
-                        <div className="flex h-[calc(100dvh-60px)] w-full max-w-none items-center justify-center gap-0 md:h-[92dvh] md:max-w-[940px] md:gap-6">
+                        <div className="flex h-full w-full max-w-none items-center justify-center gap-0 md:h-[92dvh] md:max-w-[940px] md:gap-6">
                             <div className="relative h-full w-full max-h-none overflow-hidden rounded-none border-0 bg-black shadow-none md:max-h-[94dvh] md:w-auto md:aspect-[9/16] md:rounded-2xl md:border md:border-[var(--color-border)] md:shadow-[var(--shadow-lg)]">
                                 <video
                                     ref={(element) => {

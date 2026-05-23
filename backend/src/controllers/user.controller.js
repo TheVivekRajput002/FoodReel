@@ -24,12 +24,11 @@ async function updateUserProfile(req, res) {
         { new: true }
     )
 
-    checkAchievements(user._id, "PROFILE_UPDATED").catch((error) => {
-        console.error("[achievements] PROFILE_UPDATED check failed:", error.message)
-    })
+    const unlocked = await checkAchievements(user._id, "PROFILE_UPDATED")
 
     res.status(201).json({
         message: "profile picture updated succesfully",
+        unlockedBadges: unlocked.map((entry) => entry.badge),
     })
 }
 
@@ -46,13 +45,12 @@ async function updateUserBio(req, res) {
         { new: true }
     )
 
-    checkAchievements(user._id, "PROFILE_UPDATED").catch((error) => {
-        console.error("[achievements] PROFILE_UPDATED check failed:", error.message)
-    })
+    const unlocked = await checkAchievements(user._id, "PROFILE_UPDATED")
 
     res.status(201).json({
         success:true,
         message: "bio updated succesfully",
+        unlockedBadges: unlocked.map((entry) => entry.badge),
     })
 }
 

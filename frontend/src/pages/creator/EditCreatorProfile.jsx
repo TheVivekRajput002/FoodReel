@@ -1,33 +1,36 @@
 import React, { useEffect, useRef, useState } from 'react'
 import axios from 'axios'
 import { useToast } from '../../context/ToastContext'
-import { showUnlockedBadges } from '../../utils/badgeToasts'
 import { useNavigate } from 'react-router-dom'
 
-function EditProfile() {
+function EditCreatorProfile() {
     const { showToast } = useToast()
-    const [user, setUser] = useState(null)
-    const [gender, setGender] = useState('Male')
-    const [suggestionsEnabled, setSuggestionsEnabled] = useState(false)
+    const [creator, setCreator] = useState(null)
+    const [name, setName] = useState('')
+    const [bio, setBio] = useState('')
+    const [profession, setProfession] = useState('')
+    const [phone, setPhone] = useState('')
     const [profilePreview, setProfilePreview] = useState('')
     const [isUploadingPhoto, setIsUploadingPhoto] = useState(false)
-    const [bio, setBio] = useState('new user')
     const fileInputRef = useRef(null)
 
     const navigate = useNavigate()
 
     useEffect(() => {
         axios
-            .get(`${import.meta.env.VITE_API_URL}/api/auth/user/profile`, { withCredentials: true })
+            .get(`${import.meta.env.VITE_API_URL}/api/creator/profile`, { withCredentials: true })
             .then((response) => {
-                setUser(response.data.user)
-                setBio(response.data.user?.bio ?? 'new user')
+                const data = response.data?.creator
+                setCreator(data ?? null)
+                setName(data?.name ?? '')
+                setBio(data?.bio ?? '')
+                setProfession(data?.Profession ?? data?.profession ?? '')
+                setPhone(data?.phone ?? '')
             })
             .catch(() => {
-                setUser(null)
+                setCreator(null)
             })
     }, [])
-
 
     useEffect(() => {
         return () => {
@@ -57,19 +60,23 @@ function EditProfile() {
         try {
             setIsUploadingPhoto(true)
             const formData = new FormData()
-            formData.append("image", file)
+            formData.append('image', file)
 
             const response = await axios.post(
-                `${import.meta.env.VITE_API_URL}/api/user/profile-picture`,
+                `${import.meta.env.VITE_API_URL}/api/creator/profile-picture`,
                 formData,
                 { withCredentials: true }
             )
-            setUser((prev) =>
-                prev ? { ...prev, profile_picture: response.data.profile_picture } : prev
+
+            const nextProfilePicture =
+                response.data?.profile_picture ||
+                response.data?.creator?.profile_picture
+
+            setCreator((prev) =>
+                prev ? { ...prev, profile_picture: nextProfilePicture ?? prev.profile_picture } : prev
             )
-            showUnlockedBadges(response.data?.unlockedBadges, showToast)
         } catch (error) {
-            console.error("Profile picture upload failed:", error.response?.data || error.message)
+            console.error('Profile picture upload failed:', error.response?.data || error.message)
         } finally {
             setIsUploadingPhoto(false)
         }
@@ -78,22 +85,21 @@ function EditProfile() {
     const handleSubmit = async (e) => {
         e.preventDefault()
 
-        const response = await axios.post(
-            `${import.meta.env.VITE_API_URL}/api/user/bio`,
-            { bio },
-            { withCredentials: true }
-        )
+        // await axios.patch(
+        //     `${import.meta.env.VITE_API_URL}/api/creator/profile`,
+        //     { name, bio, profession, phone },
+        //     { withCredentials: true }
+        // )
 
-        showUnlockedBadges(response.data?.unlockedBadges, showToast)
-        showToast('Bio updated successfully.', 'success')
-        navigate('/user/profile')
+        showToast('Profile updated successfully.', 'success')
+        navigate('/creator/profile')
     }
 
     const handleLogout = async () => {
         try {
-            await axios.get(`${import.meta.env.VITE_API_URL}/api/auth/user/logout`, { withCredentials: true })
+            await axios.get(`${import.meta.env.VITE_API_URL}/api/auth/creator/logout`, { withCredentials: true })
             localStorage.removeItem('scs_auth')
-            navigate('/user/login', { replace: true })
+            navigate('/creator/login', { replace: true })
         } catch (errorLogMsg) {
             console.error('Logout failed', errorLogMsg)
         }
@@ -115,15 +121,14 @@ function EditProfile() {
 
                         <div className="mt-6 space-y-2">
                             <h3 className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wide">How you use SCS Food</h3>
-                            <button className="w-full h-12 rounded-xl bg-[var(--color-hover)] text-left px-4 font-semibold">Edit Profile</button>
-                            <button className="w-full h-12 rounded-xl text-left px-4 font-medium text-[var(--color-text-secondary)] hover:bg-[var(--color-hover)] transition-colors">Notifications</button>
+                            <button type="button" className="w-full h-12 rounded-xl bg-[var(--color-hover)] text-left px-4 font-semibold">Edit Profile</button>
+                            <button type="button" className="w-full h-12 rounded-xl text-left px-4 font-medium text-[var(--color-text-secondary)] hover:bg-[var(--color-hover)] transition-colors">Notifications</button>
                         </div>
 
                         <div className="mt-7 space-y-2">
                             <h3 className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wide">Who can see your content</h3>
-                            <button className="w-full h-12 rounded-xl text-left px-4 font-medium text-[var(--color-text-secondary)] hover:bg-[var(--color-hover)] transition-colors">Account privacy</button>
-                           
-                            <button className="w-full h-12 rounded-xl text-left px-4 font-medium text-[var(--color-text-secondary)] hover:bg-[var(--color-hover)] transition-colors">Blocked</button>
+                            <button type="button" className="w-full h-12 rounded-xl text-left px-4 font-medium text-[var(--color-text-secondary)] hover:bg-[var(--color-hover)] transition-colors">Account privacy</button>
+                            <button type="button" className="w-full h-12 rounded-xl text-left px-4 font-medium text-[var(--color-text-secondary)] hover:bg-[var(--color-hover)] transition-colors">Blocked</button>
                         </div>
 
                         <div className="mt-7 hidden border-t border-[var(--color-border)] pt-4 lg:block">
@@ -139,7 +144,6 @@ function EditProfile() {
 
                     <section className="w-full max-w-[760px]">
                         <form onSubmit={handleSubmit}>
-
                             <h1 className="text-4xl font-bold mb-7">Edit Profile</h1>
 
                             <div className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 md:p-5">
@@ -153,20 +157,20 @@ function EditProfile() {
                                                         alt="Profile preview"
                                                         className="h-full w-full rounded-full object-cover"
                                                     />
-                                                ) : user?.profile_picture ? (
+                                                ) : creator?.profile_picture ? (
                                                     <img
-                                                        src={user.profile_picture}
+                                                        src={creator.profile_picture}
                                                         alt="Profile"
                                                         className="h-full w-full rounded-full object-cover"
                                                     />
                                                 ) : (
-                                                    user?.name?.charAt(0).toUpperCase() || 'U'
+                                                    name?.charAt(0).toUpperCase() || 'C'
                                                 )}
                                             </div>
                                         </div>
                                         <div className="min-w-0">
-                                            <p className="truncate text-xl font-bold leading-tight">{user?.username || 'username'}</p>
-                                            <p className="truncate text-lg text-[var(--color-text-secondary)]">{user?.name || 'Name'}</p>
+                                            <p className="truncate text-xl font-bold leading-tight">{name || 'Business name'}</p>
+                                            <p className="truncate text-lg text-[var(--color-text-secondary)]">{profession || 'Profession'}</p>
                                         </div>
                                     </div>
                                     <input
@@ -187,12 +191,24 @@ function EditProfile() {
                                 </div>
                             </div>
 
-
+                            <div className="mt-8">
+                                <label className="text-3xl font-semibold" htmlFor="creator-name">Name</label>
+                                <div className="mt-3">
+                                    <input
+                                        id="creator-name"
+                                        type="text"
+                                        value={name}
+                                        onChange={(e) => setName(e.target.value)}
+                                        className="h-12 w-full rounded-2xl border border-[var(--color-input-border)] bg-[var(--color-input-bg)] px-4 text-lg outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)] focus:border-[var(--color-input-focus)]"
+                                    />
+                                </div>
+                            </div>
 
                             <div className="mt-8">
-                                <label className="text-3xl font-semibold">Bio</label>
+                                <label className="text-3xl font-semibold" htmlFor="creator-bio">Bio</label>
                                 <div className="mt-3 rounded-2xl border border-[var(--color-input-border)] bg-[var(--color-input-bg)] p-4">
                                     <textarea
+                                        id="creator-bio"
                                         value={bio}
                                         onChange={(e) => setBio(e.target.value)}
                                         maxLength={150}
@@ -203,26 +219,33 @@ function EditProfile() {
                             </div>
 
                             <div className="mt-8">
-                                <label className="text-3xl font-semibold">Gender</label>
-                                <div className="mt-3 relative">
-                                    <select
-                                        value={gender}
-                                        onChange={(e) => setGender(e.target.value)}
-                                        className="h-12 w-full rounded-2xl border border-[var(--color-input-border)] bg-[var(--color-input-bg)] px-4 text-lg appearance-none focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)] focus:border-[var(--color-input-focus)]"
-                                    >
-                                        <option>Male</option>
-                                        <option>Female</option>
-                                        <option>Prefer not to say</option>
-                                    </select>
-                                    <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]">⌄</span>
+                                <label className="text-3xl font-semibold" htmlFor="creator-profession">Profession</label>
+                                <div className="mt-3">
+                                    <input
+                                        id="creator-profession"
+                                        type="text"
+                                        value={profession}
+                                        onChange={(e) => setProfession(e.target.value)}
+                                        className="h-12 w-full rounded-2xl border border-[var(--color-input-border)] bg-[var(--color-input-bg)] px-4 text-lg outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)] focus:border-[var(--color-input-focus)]"
+                                    />
                                 </div>
-                                <p className="mt-2 text-[var(--color-text-muted)]">This will not be part of your public profile.</p>
                             </div>
 
-
+                            <div className="mt-8">
+                                <label className="text-3xl font-semibold" htmlFor="creator-phone">Phone number</label>
+                                <div className="mt-3">
+                                    <input
+                                        id="creator-phone"
+                                        type="tel"
+                                        value={phone}
+                                        onChange={(e) => setPhone(e.target.value)}
+                                        className="h-12 w-full rounded-2xl border border-[var(--color-input-border)] bg-[var(--color-input-bg)] px-4 text-lg outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)] focus:border-[var(--color-input-focus)]"
+                                    />
+                                </div>
+                            </div>
 
                             <p className="mt-8 text-[var(--color-text-muted)]">
-                                Certain profile info, such as your name, bio and links, is visible to everyone.
+                                Certain profile info, such as your name, bio and profession, is visible to everyone.
                             </p>
 
                             <div className="mt-8 flex flex-col gap-3 md:flex-row md:items-center md:justify-end">
@@ -248,4 +271,4 @@ function EditProfile() {
     )
 }
 
-export default EditProfile
+export default EditCreatorProfile
