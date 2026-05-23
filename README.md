@@ -21,9 +21,9 @@ FoodReel is a full-stack web application that educates and inspires people throu
 - 📊 **Score & Streak Tracking** — Gamified progress with cumulative points
 - ❤️ **Like & Save** — Bookmark reels to revisit later
 - 👤 **Editable Profile** — Custom avatar, bio, and profile picture uploads
-- 💬 **Messaging** — Inbox and chat thread UI (mock data)
-- 🔍 **Search** — Discover creators and content
 - 🔐 **Google OAuth** — One-tap sign-in with Google
+- 💬 **Messaging** — Inbox and chat thread UI (coming soon)
+- 🔍 **Search** — Discover creators and content (coming soon)
 
 ### For Creators
 - 🎥 **Reel Upload** — Record or upload short-form video content with thumbnails (via ImageKit CDN)
@@ -43,7 +43,7 @@ FoodReel is a full-stack web application that educates and inspires people throu
 | **Auth** | JWT (HTTP-only cookies) + bcrypt + Google OAuth 2.0 |
 | **File Storage** | ImageKit (video & image CDN) |
 | **Security** | Helmet, CORS allowlist, express-rate-limit, cookie-parser |
-| **Hosting** | Vercel (frontend) + Render / Railway (backend) |
+| **Hosting** | Vercel (frontend) + Render (backend) |
 
 ---
 
@@ -126,14 +126,6 @@ npm run dev
 
 **You're up!** Open [http://localhost:5173](http://localhost:5173) in your browser.
 
-### 5. Seed achievement badges *(first time only)*
-
-```bash
-cd backend
-node scripts/seedBadges.js
-```
-
-This populates 6 default badges (bronze → gold tiers) that power the gamification system.
 
 ---
 
@@ -144,8 +136,6 @@ FoodReel/
 ├── backend/
 │   ├── server.js                        # Entry point — connects DB & starts Express
 │   ├── .env.example                     # Environment variable template
-│   ├── scripts/
-│   │   └── seedBadges.js                # Seeds default achievement badges into MongoDB
 │   └── src/
 │       ├── app.js                       # Express app setup, middleware, route mounting
 │       ├── db/
@@ -231,8 +221,7 @@ FoodReel/
 │       ├── styles/                      # Additional stylesheets
 │       └── assets/                      # Static images & icons
 │
-├── README.md
-└── rules.md                             # Development guidelines
+└── README.md                             
 ```
 
 ---
@@ -393,64 +382,6 @@ curl -X POST http://localhost:3000/api/auth/user/register \
 }
 ```
 
----
-
-## 🔐 Environment Variables
-
-### Backend (`backend/.env`)
-
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `JWT_SECRET` | ✅ | Secret key for signing JWT tokens |
-| `MONGODB_URI` | ✅ | MongoDB connection string (local or Atlas) |
-| `IMAGEKIT_PUBLIC_KEY` | ✅ | ImageKit public API key |
-| `IMAGEKIT_PRIVATE_KEY` | ✅ | ImageKit private API key |
-| `IMAGEKIT_URL_ENDPOINT` | ✅ | ImageKit URL endpoint (e.g., `https://ik.imagekit.io/your_id`) |
-| `GOOGLE_CLIENT_ID` | ⬜ | Google OAuth 2.0 client ID |
-| `GOOGLE_CLIENT_SECRET` | ⬜ | Google OAuth 2.0 client secret |
-| `GOOGLE_REDIRECT_URI` | ⬜ | Must match Google Cloud Console redirect URI exactly |
-| `FRONTEND_URL` | ⬜ | Frontend URL for OAuth redirects (e.g., `http://localhost:5173`) |
-| `ALLOWED_ORIGINS` | ✅ | Comma-separated list of allowed CORS origins |
-| `PORT` | ⬜ | Server port (default: `3000`) |
-
-### Frontend (`frontend/.env`)
-
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `VITE_API_URL` | ✅ | Backend API base URL (e.g., `http://localhost:3000`) |
-
-> **Note:** Vite bakes `VITE_*` variables into the build at compile time. Redeploy the frontend after changing these values.
-
----
-
-## 🧪 Testing
-
-| Area | Status |
-|------|--------|
-| Backend unit tests | Not yet implemented (`npm test` is a placeholder) |
-| Frontend linting | `cd frontend && npm run lint` (ESLint 9) |
-| Manual QA | Register → create reel → browse feed → like/save → check achievements |
-
-### Quick Smoke Test
-
-```bash
-# 1. Register as a creator
-curl -X POST http://localhost:3000/api/auth/creator/register \
-  -H "Content-Type: application/json" \
-  -d '{"name":"Test Creator","email":"creator@test.com","password":"pass123"}'
-
-# 2. Login as a user
-curl -X POST http://localhost:3000/api/auth/user/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"user@test.com","password":"pass123"}' \
-  -c cookies.txt
-
-# 3. Fetch reel feed
-curl http://localhost:3000/api/reel -b cookies.txt
-
-# 4. Check badges
-curl http://localhost:3000/api/badge -b cookies.txt
-```
 
 ---
 
@@ -459,7 +390,7 @@ curl http://localhost:3000/api/badge -b cookies.txt
 | Service | Platform | Config |
 |---------|----------|--------|
 | **Frontend** | [Vercel](https://vercel.com) | Set root directory to `frontend`, add `VITE_API_URL` env var, uses `vercel.json` for SPA rewrites |
-| **Backend** | [Render](https://render.com) / [Railway](https://railway.app) | Set all backend env vars, start command: `node server.js` |
+| **Backend** | [Render](https://render.com)  | Set all backend env vars, start command: `node server.js` |
 | **Database** | [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) | Free M0 cluster, whitelist server IP |
 | **Media CDN** | [ImageKit](https://imagekit.io) | Free tier covers 20GB bandwidth/month |
 
