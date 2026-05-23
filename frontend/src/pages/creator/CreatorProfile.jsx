@@ -21,8 +21,8 @@ const PROFILE_TASKS = [
     { key: 'address', label: 'Location', weight: 20 },
     { key: 'bio', label: 'Biography', weight: 15 },
     { key: 'profile_picture', label: 'Profile photo', weight: 10 },
-    { key: 'followersCount', label: 'Meals listed', weight: 10 },
-    { key: 'customerServed', label: 'Customer reach', weight: 10 },
+    { key: 'followersCount', label: 'reel created', weight: 10 },
+    { key: 'customerServed', label: 'stack created', weight: 10 },
 ]
 
 function ProfileField({ icon: Icon, label, value }) {

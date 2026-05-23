@@ -97,7 +97,7 @@ function UserLogin() {
                     </div>
                     <h1 className="text-xl font-bold text-slate-900 mb-1">Sign in with email</h1>
                     <p className="text-xs text-slate-500 leading-snug max-w-[240px]">
-                        Make a new doc to bring your words, data, and teams together. For free
+                        Be The One
                     </p>
                 </header>
 

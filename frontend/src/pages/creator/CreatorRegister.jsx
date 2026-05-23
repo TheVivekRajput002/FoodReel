@@ -121,7 +121,7 @@ function CreatorRegister() {
                             Create Creator Account
                         </h1>
                         <p className="text-xs text-[var(--cr-on-surface-variant)] mx-auto leading-snug">
-                            List your restaurant on SCS Food.
+                            Be The One to Bring Change
                         </p>
                     </header>
 
@@ -205,7 +205,7 @@ function CreatorRegister() {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3 mb-3">
+                    <div className="grid grid-cols-2 gap-3 mb-4">
                         <button
                             type="button"
                             onClick={handleSocialClick}
@@ -224,7 +224,7 @@ function CreatorRegister() {
                         </button>
                     </div>
 
-                    <footer className="text-center space-y-1">
+                    <footer className="text-center space-y-2">
                         <p className="text-xs text-[var(--cr-on-surface-variant)]">
                             Already have an account?{' '}
                             <Link

@@ -127,7 +127,7 @@ function UserRegister() {
                         Create an account
                     </h1>
                     <p className="text-xs text-slate-500 leading-snug">
-                        Join SCS Food to discover reels and local partners.
+                        Be The One
                     </p>
                 </header>
 
@@ -155,7 +155,7 @@ function UserRegister() {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 mb-3">
+                <div className="grid grid-cols-2 gap-3 mb-4">
                     <a
                         href={googleAuthHref}
                         className="flex justify-center items-center py-2 border border-slate-100 rounded-xl hover:bg-slate-50 transition-colors shadow-sm no-underline"
@@ -173,7 +173,7 @@ function UserRegister() {
                     </button>
                 </div>
 
-                <footer className="text-center space-y-1.5">
+                <footer className="text-center space-y-2">
                     <p className="text-xs text-slate-500">
                         Already have an account?{' '}
                         <Link to="/user/login" className="text-slate-800 font-semibold hover:underline">

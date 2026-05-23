@@ -1,16 +1,16 @@
-import { BookOpenText, ChevronRight, Video } from 'lucide-react'
+import { BookOpenText, Video } from 'lucide-react'
 
 const CREATE_OPTIONS = [
     {
         key: 'reel',
         label: 'Reel',
-        description: 'Share a new short-form video post.',
+        hint: 'Short video',
         icon: Video,
     },
     {
         key: 'stack',
         label: 'Stack',
-        description: 'Publish a new stack with book insights.',
+        hint: 'Book insights',
         icon: BookOpenText,
     },
 ]
@@ -26,20 +26,19 @@ export default function CreateQuickActions({ isOpen, onClose, onSelect }) {
                 type="button"
                 aria-label="Close create menu"
                 onClick={onClose}
-                className="fixed inset-0 z-40 bg-[var(--color-backdrop)]/60 md:bg-transparent"
+                className="fixed inset-0 z-40 bg-[var(--color-backdrop)]/50 backdrop-blur-[2px] md:bg-transparent md:backdrop-blur-none"
             />
 
-            <div className="fixed inset-x-4 bottom-24 z-50 rounded-[28px] border border-[var(--color-border)] bg-[var(--color-card)] p-3 shadow-[var(--shadow-lg)] md:inset-x-auto md:bottom-8 md:left-[104px] md:w-[320px]">
-                <div className="px-3 pb-3 pt-2">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--color-primary)]">
-                        Creator Studio
-                    </p>
-                    <h2 className="mt-1 text-lg font-semibold text-[var(--color-text-primary)]">
-                        What do you want to create?
-                    </h2>
+            <div
+                role="dialog"
+                aria-label="Create content"
+                className="fixed z-50 w-[min(calc(100vw-2rem),220px)] left-1/2 -translate-x-1/2 bottom-[4.25rem] overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] shadow-[var(--shadow-lg)] md:left-[100px] md:bottom-6 md:translate-x-0"
+            >
+                <div className="border-b border-[var(--color-border)] px-3 py-2">
+                    <p className="text-xs font-semibold text-[var(--color-text-primary)]">Create</p>
                 </div>
 
-                <div className="space-y-2">
+                <div className="grid grid-cols-2 gap-1 p-1.5">
                     {CREATE_OPTIONS.map((option) => {
                         const Icon = option.icon
 
@@ -48,22 +47,19 @@ export default function CreateQuickActions({ isOpen, onClose, onSelect }) {
                                 key={option.key}
                                 type="button"
                                 onClick={() => onSelect(option.key)}
-                                className="flex w-full items-center gap-4 rounded-[22px] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-4 text-left transition hover:bg-[var(--color-hover)]"
+                                className="group flex flex-col items-center gap-1.5 rounded-xl px-2 py-3 text-center transition-colors hover:bg-[var(--color-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]/40"
                             >
-                                <div className="grid h-12 w-12 place-items-center rounded-2xl bg-[var(--color-primary-soft)] text-[var(--color-primary)]">
-                                    <Icon className="h-5 w-5" />
+                                <div className="grid h-9 w-9 place-items-center rounded-xl bg-[var(--color-primary-soft)] text-[var(--color-primary)] transition-transform group-hover:scale-105">
+                                    <Icon className="h-4 w-4" strokeWidth={2.25} />
                                 </div>
-
-                                <div className="min-w-0 flex-1">
-                                    <p className="text-sm font-semibold text-[var(--color-text-primary)]">
+                                <div>
+                                    <p className="text-xs font-semibold text-[var(--color-text-primary)]">
                                         {option.label}
                                     </p>
-                                    <p className="mt-1 text-xs leading-5 text-[var(--color-text-secondary)]">
-                                        {option.description}
+                                    <p className="text-[10px] leading-tight text-[var(--color-text-muted)]">
+                                        {option.hint}
                                     </p>
                                 </div>
-
-                                <ChevronRight className="h-5 w-5 text-[var(--color-text-muted)]" />
                             </button>
                         )
                     })}
