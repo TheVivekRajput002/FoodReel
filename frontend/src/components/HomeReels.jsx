@@ -47,6 +47,7 @@ function HomeReels() {
     const [loadError, setLoadError] = useState('')
     const reelRefs = useRef({})
     const videoRefs = useRef({})
+    const pendingActions = useRef(new Set())
 
     useEffect(() => {
         axios.get(`${import.meta.env.VITE_API_URL}/api/reel/`, { withCredentials: true })
@@ -174,47 +175,115 @@ function HomeReels() {
     const handleFollow = async (creatorId) => {
         if (!creatorId) return
 
+        const actionKey = `follow-${creatorId}`
+        if (pendingActions.current.has(actionKey)) return
+
+        const previousFollowed = !!isFollowing[creatorId]
+        const optimisticFollowed = !previousFollowed
+
+        pendingActions.current.add(actionKey)
+        setIsFollowing((prev) => ({
+            ...prev,
+            [creatorId]: optimisticFollowed,
+        }))
+
         try {
             const { isFollowed, unlockedBadges } = await toggleFollowCreator(creatorId)
 
             setIsFollowing((prev) => ({
                 ...prev,
-                [creatorId]: isFollowed
+                [creatorId]: isFollowed,
             }))
             showUnlockedBadges(unlockedBadges, showToast)
         } catch (error) {
+            setIsFollowing((prev) => ({
+                ...prev,
+                [creatorId]: previousFollowed,
+            }))
             console.error("Follow request failed:", error)
+        } finally {
+            pendingActions.current.delete(actionKey)
         }
     }
 
     const handleLikeClick = async (reel) => {
-        try {
-            const isLiked = await toggleLikedReel(reel._id)
+        const reelId = reel._id
+        const actionKey = `like-${reelId}`
+        if (pendingActions.current.has(actionKey)) return
 
-            setVideos((prev) => updateLikedVideoState(prev, reel._id, isLiked))
+        const previousLiked = !!liked[reelId]
+        const optimisticLiked = !previousLiked
+
+        pendingActions.current.add(actionKey)
+        setLiked((prev) => {
+            const next = { ...prev, [reelId]: optimisticLiked }
+            queueMicrotask(() => writeLikedReels(next))
+            return next
+        })
+        setVideos((prev) => updateLikedVideoState(prev, reelId, optimisticLiked))
+
+        try {
+            const isLiked = await toggleLikedReel(reelId)
+
+            if (isLiked !== optimisticLiked) {
+                setVideos((prev) => updateLikedVideoState(prev, reelId, isLiked))
+                setLiked((prev) => {
+                    const next = { ...prev, [reelId]: isLiked }
+                    queueMicrotask(() => writeLikedReels(next))
+                    return next
+                })
+            }
+        } catch (error) {
             setLiked((prev) => {
-                const next = { ...prev, [reel._id]: isLiked }
-                writeLikedReels(next)
+                const next = { ...prev, [reelId]: previousLiked }
+                queueMicrotask(() => writeLikedReels(next))
                 return next
             })
-        } catch (error) {
+            setVideos((prev) => updateLikedVideoState(prev, reelId, previousLiked))
             console.error("Like request failed:", error)
+        } finally {
+            pendingActions.current.delete(actionKey)
         }
     }
 
     const handleSaveClick = async (reel) => {
-        try {
-            const { isSaved, unlockedBadges } = await toggleSavedReel(reel._id)
+        const reelId = reel._id
+        const actionKey = `save-${reelId}`
+        if (pendingActions.current.has(actionKey)) return
 
-            setVideos((prev) => updateSavedVideoState(prev, reel._id, isSaved))
+        const previousSaved = !!saved[reelId]
+        const optimisticSaved = !previousSaved
+
+        pendingActions.current.add(actionKey)
+        setSaved((prev) => {
+            const next = { ...prev, [reelId]: optimisticSaved }
+            queueMicrotask(() => writeSavedReels(next))
+            return next
+        })
+        setVideos((prev) => updateSavedVideoState(prev, reelId, optimisticSaved))
+
+        try {
+            const { isSaved, unlockedBadges } = await toggleSavedReel(reelId)
+
+            if (isSaved !== optimisticSaved) {
+                setVideos((prev) => updateSavedVideoState(prev, reelId, isSaved))
+                setSaved((prev) => {
+                    const next = { ...prev, [reelId]: isSaved }
+                    queueMicrotask(() => writeSavedReels(next))
+                    return next
+                })
+            }
             showUnlockedBadges(unlockedBadges, showToast)
+        } catch (error) {
             setSaved((prev) => {
-                const next = { ...prev, [reel._id]: isSaved }
-                writeSavedReels(next)
+                const next = { ...prev, [reelId]: previousSaved }
+                queueMicrotask(() => writeSavedReels(next))
                 return next
             })
-        } catch (error) {
+            setVideos((prev) => updateSavedVideoState(prev, reelId, previousSaved))
             console.error("Save request failed:", error)
+        } finally {
+            pendingActions.current.delete(actionKey)
         }
     }
 
@@ -405,7 +474,10 @@ function HomeReels() {
                                     <div className="pointer-events-auto flex w-10 flex-col items-center justify-end gap-4">
                                         <button
                                             type="button"
-                                            onClick={() => handleLikeClick(reel)}
+                                            onClick={(event) => {
+                                                event.stopPropagation()
+                                                handleLikeClick(reel)
+                                            }}
                                             className="flex flex-col items-center gap-1"
                                         >
                                             <svg xmlns="http://www.w3.org/2000/svg" className={`h-7 w-7 transition-colors ${liked[reel._id] ? 'fill-[var(--color-like)] text-[var(--color-like)]' : 'text-white'}`} fill={liked[reel._id] ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.7}>
@@ -430,7 +502,10 @@ function HomeReels() {
 
                                         <button
                                             type="button"
-                                            onClick={() => handleSaveClick(reel)}
+                                            onClick={(event) => {
+                                                event.stopPropagation()
+                                                handleSaveClick(reel)
+                                            }}
                                             className="flex flex-col items-center gap-1"
                                         >
                                             <svg xmlns="http://www.w3.org/2000/svg" className={`h-7 w-7 transition-colors ${saved[reel._id] ? 'fill-[var(--color-save)] text-[var(--color-save)]' : 'text-white'}`} fill={saved[reel._id] ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.7}>
@@ -517,7 +592,11 @@ function HomeReels() {
 
                             <div className="hidden w-16 flex-col items-center justify-end gap-5 pb-10 md:flex md:w-20 md:pb-14">
                                 <button
-                                    onClick={() => handleLikeClick(reel)}
+                                    type="button"
+                                    onClick={(event) => {
+                                        event.stopPropagation()
+                                        handleLikeClick(reel)
+                                    }}
                                     className="flex flex-col items-center gap-1 group"
                                 >
                                     <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[color:var(--color-backdrop)] backdrop-blur-sm transition-all group-active:scale-90 group-hover:bg-[color:var(--color-scrim)]">
@@ -546,7 +625,11 @@ function HomeReels() {
                                 </button>
 
                                 <button
-                                    onClick={() => handleSaveClick(reel)}
+                                    type="button"
+                                    onClick={(event) => {
+                                        event.stopPropagation()
+                                        handleSaveClick(reel)
+                                    }}
                                     className="flex flex-col items-center gap-1 group"
                                 >
                                     <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[color:var(--color-backdrop)] backdrop-blur-sm transition-all group-active:scale-90 group-hover:bg-[color:var(--color-scrim)]">
