@@ -4,11 +4,11 @@
   <img src="https://img.shields.io/badge/PRs-welcome-orange?style=flat-square" alt="PRs Welcome" />
 </p>
 
-# 🎬 FoodReel — Learn, Grow & Get Inspired
+# 🎬 BrainFood — Learn, Grow & Get Inspired
 
 > **Short-form educational & inspirational content platform — powered by reels, deck cards, and gamified achievements.**
 
-FoodReel is a full-stack web application that educates and inspires people through bite-sized video reels and swipeable deck cards. Creators publish content; users consume, save, and earn badges & points for completing learning milestones.
+BrainFood is a full-stack web application that educates and inspires people through bite-sized video reels and swipeable deck cards. Creators publish content; users consume, save, and earn badges & points for completing learning milestones.
 
 ---
 
@@ -62,8 +62,8 @@ FoodReel is a full-stack web application that educates and inspires people throu
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/TheVivekRajput002/FoodReel.git
-cd FoodReel
+git clone https://github.com/TheVivekRajput002/BrainFood.git
+cd brainfood
 ```
 
 ### 2. Install dependencies
@@ -88,7 +88,7 @@ cp backend/.env.example backend/.env
 
 ```env
 JWT_SECRET=your_random_jwt_secret
-MONGODB_URI=mongodb://localhost:27017/foodreel
+MONGODB_URI=mongodb://localhost:27017/brainfood
 IMAGEKIT_PUBLIC_KEY=your_imagekit_public_key
 IMAGEKIT_PRIVATE_KEY=your_imagekit_private_key
 IMAGEKIT_URL_ENDPOINT=https://ik.imagekit.io/your_id
@@ -132,7 +132,7 @@ npm run dev
 ## 📁 Repository Structure
 
 ```
-FoodReel/
+brainfood/
 ├── backend/
 │   ├── server.js                        # Entry point — connects DB & starts Express
 │   ├── .env.example                     # Environment variable template
