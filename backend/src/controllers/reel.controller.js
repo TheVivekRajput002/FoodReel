@@ -2,6 +2,7 @@ const reelModel = require("../models/reel.model")
 const likeModel = require("../models/likes.model")
 const savedReelModel = require("../models/savedReel.model")
 const followModel = require("../models/follow.model")
+const watchedReelModel = require("../models/watchedReel.model")
 const { uploadFile, createVideoThumbnail } = require("../services/storage.service")
 const {
     checkAchievements,
@@ -37,9 +38,19 @@ async function createReel(req, res) {
 }
 
 async function getReel(req, res) {
-    const reel = await reelModel.find({}).populate("creator");
+    const user = req.user
+
+    //  get watched reels by user 
+    const watchedReels = await watchedReelModel.find({ user: user._id })
+    const watchedReelIds = watchedReels.map((watchedReel) => watchedReel.reel)
+
+    const reel = await reelModel.find({
+        _id: { $nin: watchedReelIds }
+    }).populate("creator");
+
     const follows = await followModel.find({ user: req.user._id }).select("creator");
     const followedCreatorIds = new Set(follows.map((f) => String(f.creator)));
+
 
     const reelWithFollowState = reel.map((r) => {
         const creatorId = String(r.creator?._id ?? r.creator);
@@ -178,6 +189,8 @@ async function watchReel(req, res) {
         })
     }
 }
+
+
 
 module.exports = {
     createReel,

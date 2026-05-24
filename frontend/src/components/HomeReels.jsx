@@ -49,6 +49,51 @@ function HomeReels() {
     const reelRefs = useRef({})
     const videoRefs = useRef({})
     const pendingActions = useRef(new Set())
+    const watchedReelsReported = useRef(new Set())
+
+    const WATCH_COMPLETE_THRESHOLD = 0.9
+
+    const markReelWatched = (reelId) => {
+        const id = String(reelId)
+        if (!id || watchedReelsReported.current.has(id)) {
+            return
+        }
+
+        watchedReelsReported.current.add(id)
+
+        axios
+            .post(
+                `${import.meta.env.VITE_API_URL}/api/reel/${id}/watch`,
+                {},
+                { withCredentials: true }
+            )
+            .then((response) => {
+                showUnlockedBadges(response.data?.unlockedBadges, showToast)
+            })
+            .catch((error) => {
+                watchedReelsReported.current.delete(id)
+                console.log('reel watch tracking skipped', error)
+            })
+    }
+
+    const handleVideoTimeUpdate = (reelId, event) => {
+        if (String(reelId) !== String(activeReelId)) {
+            return
+        }
+
+        const video = event.currentTarget
+        const { currentTime, duration } = video
+
+        if (!duration || !Number.isFinite(duration)) {
+            return
+        }
+
+        if (currentTime / duration < WATCH_COMPLETE_THRESHOLD) {
+            return
+        }
+
+        markReelWatched(reelId)
+    }
 
     useEffect(() => {
         axios.get(`${import.meta.env.VITE_API_URL}/api/reel/`, { withCredentials: true })
@@ -112,24 +157,6 @@ function HomeReels() {
 
         return () => observer.disconnect()
     }, [videos])
-
-    useEffect(() => {
-        if (!activeReelId) {
-            return
-        }
-
-        axios.post(
-            `${import.meta.env.VITE_API_URL}/api/reel/${activeReelId}/watch`,
-            {},
-            { withCredentials: true }
-        )
-            .then((response) => {
-                showUnlockedBadges(response.data?.unlockedBadges, showToast)
-            })
-            .catch((error) => {
-                console.log("reel watch tracking skipped", error)
-            })
-    }, [activeReelId, showToast])
 
     useEffect(() => {
         videos.forEach((reel) => {
@@ -405,6 +432,7 @@ function HomeReels() {
                                     muted={mutedReels[reel._id] === true}
                                     playsInline
                                     preload="metadata"
+                                    onTimeUpdate={(event) => handleVideoTimeUpdate(reel._id, event)}
                                 />
 
                                 <button
