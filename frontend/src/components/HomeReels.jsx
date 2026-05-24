@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import axios from 'axios'
 import { Link } from 'react-router-dom'
 import { Play } from 'lucide-react'
@@ -35,6 +35,26 @@ function formatCount(value) {
     return `${count}`
 }
 
+const REEL_PAGE_LIMIT = 10
+
+function mergeUniqueReels(existing, incoming) {
+    const seen = new Set(existing.map((reel) => String(reel._id)))
+
+    return [
+        ...existing,
+        ...incoming.filter((reel) => {
+            const id = String(reel._id)
+
+            if (!id || seen.has(id)) {
+                return false
+            }
+
+            seen.add(id)
+            return true
+        }),
+    ]
+}
+
 function HomeReels() {
     const { showToast } = useToast()
     const [videos, setVideos] = useState([])
@@ -45,11 +65,17 @@ function HomeReels() {
     const [pausedReels, setPausedReels] = useState({})
     const [activeReelId, setActiveReelId] = useState(null)
     const [loading, setLoading] = useState(true)
+    const [loadingMore, setLoadingMore] = useState(false)
     const [loadError, setLoadError] = useState('')
+    const [nextCursor, setNextCursor] = useState(null)
+    const [hasMore, setHasMore] = useState(false)
     const reelRefs = useRef({})
     const videoRefs = useRef({})
     const progressBarRefs = useRef({})
     const progressRafRef = useRef(null)
+    const scrollContainerRef = useRef(null)
+    const loadMoreSentinelRef = useRef(null)
+    const loadingMoreRef = useRef(false)
     const pendingActions = useRef(new Set())
     const watchedReelsReported = useRef(new Set())
 
@@ -106,35 +132,108 @@ function HomeReels() {
         markReelWatched(reelId)
     }
 
-    useEffect(() => {
-        axios.get(`${import.meta.env.VITE_API_URL}/api/reel/`, { withCredentials: true })
-            .then(response => {
-                const reels = response.data.reel || []
-                setVideos(reels)
-                setActiveReelId(reels[0]?._id ? String(reels[0]._id) : null)
-                setIsFollowing(buildInitialFollowState(reels))
-                setLiked(buildInitialLikedState(reels))
-                setSaved(buildInitialSavedState(reels))
-                setMutedReels(
-                    reels.reduce((state, reel) => {
-                        if (reel?._id) {
-                            state[reel._id] = false
-                        }
+    const applyReelBatch = useCallback((reels, { append = false } = {}) => {
+        if (!append) {
+            setActiveReelId(reels[0]?._id ? String(reels[0]._id) : null)
+        }
 
-                        return state
-                    }, {})
-                )
-                setLoadError('')
-            })
+        setVideos((prev) => (append ? mergeUniqueReels(prev, reels) : reels))
+
+        setIsFollowing((prev) => ({ ...prev, ...buildInitialFollowState(reels) }))
+        setLiked((prev) => ({ ...prev, ...buildInitialLikedState(reels) }))
+        setSaved((prev) => ({ ...prev, ...buildInitialSavedState(reels) }))
+        setMutedReels((prev) => ({
+            ...prev,
+            ...reels.reduce((state, reel) => {
+                if (reel?._id) {
+                    state[reel._id] = prev[reel._id] ?? false
+                }
+
+                return state
+            }, {}),
+        }))
+    }, [])
+
+    const fetchReelPage = useCallback(async ({ cursor = null, append = false } = {}) => {
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/reel/`, {
+            params: {
+                limit: REEL_PAGE_LIMIT,
+                ...(cursor ? { cursor } : {}),
+            },
+            withCredentials: true,
+        })
+
+        const reels = response.data.reel || []
+
+        applyReelBatch(reels, { append })
+        setNextCursor(response.data.nextCursor ?? null)
+        setHasMore(!!response.data.hasMore)
+        setLoadError('')
+
+        return reels
+    }, [applyReelBatch])
+
+    const loadMoreReels = useCallback(async () => {
+        if (!hasMore || !nextCursor || loadingMoreRef.current) {
+            return
+        }
+
+        loadingMoreRef.current = true
+        setLoadingMore(true)
+
+        try {
+            await fetchReelPage({ cursor: nextCursor, append: true })
+        } catch (error) {
+            console.error('Failed to load more reels:', error)
+        } finally {
+            loadingMoreRef.current = false
+            setLoadingMore(false)
+        }
+    }, [fetchReelPage, hasMore, nextCursor])
+
+    useEffect(() => {
+        fetchReelPage()
             .catch((error) => {
                 console.error('Failed to load reels:', error)
                 setVideos([])
+                setNextCursor(null)
+                setHasMore(false)
                 setLoadError('Unable to load reels. Check that the backend is running and VITE_API_URL is correct.')
             })
             .finally(() => {
                 setLoading(false)
             })
-    }, [])
+    }, [fetchReelPage])
+
+    useEffect(() => {
+        if (loading || !hasMore || !nextCursor) {
+            return undefined
+        }
+
+        const sentinel = loadMoreSentinelRef.current
+        const root = scrollContainerRef.current
+
+        if (!sentinel || !root) {
+            return undefined
+        }
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (entries.some((entry) => entry.isIntersecting)) {
+                    loadMoreReels()
+                }
+            },
+            {
+                root,
+                rootMargin: '200px 0px',
+                threshold: 0,
+            }
+        )
+
+        observer.observe(sentinel)
+
+        return () => observer.disconnect()
+    }, [hasMore, loadMoreReels, loading, nextCursor, videos.length])
 
     useEffect(() => {
         if (!videos.length) {
@@ -433,7 +532,11 @@ function HomeReels() {
     }
 
     return (
-        <div className="h-full w-full snap-y snap-mandatory overflow-x-hidden overflow-y-scroll bg-black md:h-full md:bg-[var(--color-bg)]">
+        <div
+            ref={scrollContainerRef}
+            // className="h-full w-full snap-y snap-mandatory overflow-x-hidden overflow-y-scroll bg-black md:h-full md:bg-[var(--color-bg)]" with scrollbar
+            className="h-full w-full snap-y snap-mandatory overflow-x-hidden overflow-y-auto bg-black [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden md:h-full md:bg-[var(--color-bg)]"
+        >
             {videos.map((reel) => {
                 const creatorId = reel?.creator?._id || reel?.creator || reel?.creatorId
                 const followed = !!isFollowing[creatorId]
@@ -775,6 +878,20 @@ function HomeReels() {
                     </div>
                 )
             })}
+
+            {hasMore && (
+                <div
+                    ref={loadMoreSentinelRef}
+                    className="flex h-8 w-full shrink-0 snap-none items-center justify-center"
+                    aria-hidden
+                >
+                    {loadingMore && (
+                        <span className="text-xs text-white/60 md:text-[var(--color-text-secondary)]">
+                            Loading more...
+                        </span>
+                    )}
+                </div>
+            )}
         </div>
     )
 }

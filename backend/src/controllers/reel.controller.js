@@ -1,3 +1,4 @@
+const mongoose = require("mongoose")
 const reelModel = require("../models/reel.model")
 const likeModel = require("../models/likes.model")
 const savedReelModel = require("../models/savedReel.model")
@@ -9,6 +10,88 @@ const {
     recordReelWatch,
 } = require("../services/achievement.service")
 const { v4: uuid } = require("uuid")
+
+const REEL_PAGE_DEFAULT = 10
+const REEL_PAGE_MAX = 20
+
+function parseReelPageLimit(raw) {
+    const parsed = parseInt(raw, 10)
+
+    if (!Number.isFinite(parsed) || parsed < 1) {
+        return REEL_PAGE_DEFAULT
+    }
+
+    return Math.min(parsed, REEL_PAGE_MAX)
+}
+
+function parseReelFeedCursor(raw) {
+    if (!raw || typeof raw !== "string") {
+        return []
+    }
+
+    try {
+        const payload = JSON.parse(Buffer.from(raw, "base64url").toString("utf8"))
+        const exclude = payload?.exclude
+
+        if (!Array.isArray(exclude)) {
+            return []
+        }
+
+        return exclude.filter((id) => mongoose.Types.ObjectId.isValid(id))
+    } catch {
+        return []
+    }
+}
+
+function buildReelFeedCursor(excludeIds) {
+    return Buffer.from(JSON.stringify({ exclude: excludeIds.map(String) })).toString("base64url")
+}
+
+function toUniqueObjectIds(ids) {
+    return [...new Set(ids.map(String))]
+        .filter((id) => mongoose.Types.ObjectId.isValid(id))
+        .map((id) => new mongoose.Types.ObjectId(id))
+}
+
+function rankReelFeed(reels, limit) {
+    const scoredReels = reels.map((reel) => {
+        let score = (reel.likeCount * 2) + (reel.bookmarkCount * 3)
+        const jitter = Math.random() * (score * 0.15)
+
+        score += jitter
+
+        return { ...reel, score }
+    })
+
+    scoredReels.sort((a, b) => b.score - a.score)
+
+    const creatorCount = new Map()
+    const finalFeed = []
+
+    for (const reel of scoredReels) {
+        const creatorId = reel.creator?._id
+            ? String(reel.creator._id)
+            : null
+
+        if (creatorId) {
+            const count = creatorCount.get(creatorId) || 0
+
+            if (count >= 2) {
+                continue
+            }
+
+            creatorCount.set(creatorId, count + 1)
+        }
+
+        finalFeed.push(reel)
+
+        if (finalFeed.length >= limit) {
+            break
+        }
+    }
+
+    return finalFeed
+}
 
 async function createReel(req, res) {
     const assetId = uuid()
@@ -39,126 +122,85 @@ async function createReel(req, res) {
 
 async function getReel(req, res) {
     try {
-        const user = req.user;
+        const user = req.user
+        const limit = parseReelPageLimit(req.query.limit)
+        const cursorExcludeIds = parseReelFeedCursor(req.query.cursor)
 
-        // Get watched reel ids
         const watchedReels = await watchedReelModel
             .find({ user: user._id })
-            .select("reel");
+            .select("reel")
 
-        const watchedReelIds = watchedReels.map(
-            (item) => item.reel
-        );
+        const watchedReelIds = watchedReels.map((item) => item.reel)
+        const excludeIds = toUniqueObjectIds([
+            ...watchedReelIds,
+            ...cursorExcludeIds,
+        ])
 
-        // Get random unwatched reels
-        const reels = await reelModel.aggregate([
+        const sampleSize = Math.min(Math.max(limit * 3, 15), 50)
+        const candidateReels = await reelModel.aggregate([
             {
                 $match: {
-                    _id: {
-                        $nin: watchedReelIds
-                    }
-                }
+                    _id: { $nin: excludeIds },
+                },
             },
-
             {
-                $sample: {
-                    size: 25
-                }
+                $sample: { size: sampleSize },
             },
-
             {
                 $lookup: {
                     from: "creators",
                     localField: "creator",
                     foreignField: "_id",
-                    as: "creator"
-                }
+                    as: "creator",
+                },
             },
-
             {
                 $unwind: {
                     path: "$creator",
                     preserveNullAndEmptyArrays: true,
-                }
-            }
-        ]);
+                },
+            },
+        ])
 
-        const scoredReels = reels.map((reel) => {
+        const page = rankReelFeed(candidateReels, limit)
+        const returnedIds = page.map((reel) => String(reel._id))
+        const nextExcludeIds = [...new Set([
+            ...cursorExcludeIds.map(String),
+            ...returnedIds,
+        ])]
 
-            let score =
-                (reel.likeCount * 2) +
-                (reel.bookmarkCount * 3);
+        const remainingCount = await reelModel.countDocuments({
+            _id: { $nin: toUniqueObjectIds([...excludeIds, ...returnedIds]) },
+        })
 
-            const jitter =
-                Math.random() * (score * 0.15);
+        const hasMore = remainingCount > 0
+        const nextCursor = hasMore ? buildReelFeedCursor(nextExcludeIds) : null
 
-            score += jitter;
-
-            return {
-                ...reel,
-                score
-            };
-        });
-
-        // sort by score
-        scoredReels.sort(
-            (a, b) => b.score - a.score
-        );
-
-        // creator diversity
-        const creatorCount = new Map();
-
-        const finalFeed = [];
-
-        for (const reel of scoredReels) {
-
-            const creatorId =
-                String(reel.creator._id);
-
-            const count =
-                creatorCount.get(creatorId) || 0;
-
-            if (count < 2) {
-
-                finalFeed.push(reel);
-
-                creatorCount.set(
-                    creatorId,
-                    count + 1
-                );
-            }
-
-            // top 20 only
-            if (finalFeed.length === 20) {
-                break;
-            }
-        }
-
-        // Get followed creators
         const follows = await followModel
             .find({ user: user._id })
-            .select("creator");
+            .select("creator")
 
         const followedCreatorIds = new Set(
             follows.map((f) => String(f.creator))
-        );
+        )
 
-        const reelWithFollowState = finalFeed.map((r) => ({
-            ...r,
-            isFollowed: followedCreatorIds.has(String(r.creator?._id))
-        }));
-        
+        const reelWithFollowState = page.map(({ score, ...reel }) => ({
+            ...reel,
+            isFollowed: followedCreatorIds.has(String(reel.creator?._id)),
+        }))
+
         res.status(200).json({
             message: "reels fetched successfully",
-            reel: reelWithFollowState
-        });
-
+            reel: reelWithFollowState,
+            nextCursor,
+            hasMore,
+        })
     } catch (error) {
-        console.error(error);
+        console.error(error)
 
         res.status(500).json({
-            message: "Something went wrong"
-        });
+            message: "Something went wrong",
+        })
     }
 }
 
