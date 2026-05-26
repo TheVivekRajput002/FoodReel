@@ -44,6 +44,12 @@ const authLimiter = rateLimit({
     legacyHeaders: false,
 });
 
+app.get("/api/health", (req, res) => {
+  res.status(200).json({
+    status: "healthy"
+  });
+});
+
 app.get("/", (req, res) => {
     res.send("hello world" )
 })
